@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <title> {% block title %} Tafazzolian-Library {% endblock %} </title>
+
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+
+    <style>
+        .jumbotron{
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: azure;
+        }
+    </style>
+
+</head>
+<body>
+
+{% include 'include/navbar.html' %}
+{% include 'include/msg.html' %}
+
+<div class="jumbotron">
+
+    {% block content %} <H1> Library </H1>
+     <p>welcome {{request.user}} </p>
+        <form action="" method="get">
+        {{ search.as_p }}
+        <input type="submit" value="Search">
+        </form><br/><br/>
+    <div class="card">
+        <h3 class="card-title jumbotron">All books</h3>
+    {% for i in books %}
+    <a href="{{ i.get_absolute_url }}" class="card-body">{{i.title}}- Copies available: {{i.copies_available}}</a>
+    {% endfor %}
+    </div>
+    {% endblock %}
+
+    </div>
+
+</body>
+</html>
