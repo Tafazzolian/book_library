@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
 
-    <title> {% block title %} Tafazzolian-Library {% endblock %} </title>
+    <title> {% block title %} Tafazzolian {% endblock %} </title>
 
     <!-- CSS only -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -24,21 +24,25 @@
 
 <div class="jumbotron">
 
-    {% block content %} <H1> Library </H1>
-     <p>welcome {{request.user}} </p>
-        <form action="" method="get">
-        {{ search.as_p }}
-        <input type="submit" value="Search">
-        </form><br/><br/>
+    {% block content %} <H1> Tank book-library </H1>
+     <h3>welcome {{request.user}} </h3><br/>
     <div class="card">
         <h3 class="card-title jumbotron">All books</h3>
-    {% for i in books %}
-    <a href="{{ i.get_absolute_url }}" class="card-body">{{i.title}}- Copies available: {{i.copies_available}}</a>
+        {% for i in books %}
+        <a class="card-body" href="{% url 'library:borrow' i.id  %}" >{{i.title}}- Copies available: {{i.copies_available}}</a>
+        {% endfor %}
+    <br/>
+        <h3 class="card-title jumbotron">Borrowed Books</h3>
+    {% for i in borrowed_books %}
+    <a href="#" class="card-body">Borrowed by: {{ i.user}} - Book title: {{i.book}}- Return date: {{i.return_date}}</a>
     {% endfor %}
+
+   
+
     </div>
     {% endblock %}
 
-    </div>
+</div>
 
 </body>
 </html>
