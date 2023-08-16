@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
 
-    <title> {% block title %} Tafazzolian {% endblock %} </title>
+    <title> {% block title %} {{user}} {% endblock %} </title>
 
     <!-- CSS only -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -15,30 +15,23 @@
             background-color: azure;
         }
     </style>
-
 </head>
-<body>
 
+<body>
 {% include 'include/navbar.html' %}
 {% include 'include/msg.html' %}
 
 <div class="jumbotron">
 
-    {% block content %} <H1> Book details </H1>
+    {% block content %} <H1> {{ user }} Profile </H1> 
+     <br/>
     <div class="card">
-        <h3 class="card-title jumbotron">{{ books.title }} - Copies available: {{books.copies_available}}</h3>
-
-        <form action=" " method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input type="submit" value="Borrow">
-        </form>
-
-    <br/>
-
-    </div>
+        <h3 class="card-title jumbotron">Borrowed Books</h3>
+    {% for i in borrowed_books %}
+    <li> Borrowed by: {{i.user}} - Book title: {{i.book}}- Return date: {{i.return_date}} </li>
+    <a class="card-body" href="{% url 'library:return' i.id  %}" >Return</a>
+    {% endfor %}
     {% endblock %}
-
 </div>
 
 </body>

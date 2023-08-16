@@ -1,4 +1,7 @@
 from django import forms
 
 class DateInputForm(forms.Form):
-    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    Return_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+
+class ReturnBookForm(forms.Form):
+    pass

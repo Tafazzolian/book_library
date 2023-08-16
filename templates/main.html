@@ -25,31 +25,16 @@
 <div class="jumbotron">
 
     {% block content %} <H1> Tank book-library </H1>
-     <h3>welcome {{request.user}} </h3><br/>
+
     <div class="card">
         <h3 class="card-title jumbotron">All books</h3>
-
-        <form action=" " method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input type="submit" value="Borrow">
-        </form>
 
         {% for i in books %}
         <a class="card-body" href="{% url 'library:borrow' i.id  %}" >{{i.title}}- Copies available: {{i.copies_available}}</a>
        
         {% endfor %}
-    <br/>
-        <h3 class="card-title jumbotron">Borrowed Books</h3>
-    {% for i in borrowed_books %}
-    <a href="#" class="card-body">Borrowed by: {{ i.user}} - Book title: {{i.book}}- Return date: {{i.return_date}}</a>
-    {% endfor %}
-
-   
-
-    </div>
-    {% endblock %}
-
+        {% endblock %}
+        
 </div>
 
 </body>
