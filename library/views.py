@@ -1,6 +1,6 @@
 from django.views import View
-from library.models import Books,BorrowedBook
-from django.contrib.auth.models import User
+from library.models import Books,BorrowedBook, User
+#from django.contrib.auth.models import User
 from datetime import date
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
