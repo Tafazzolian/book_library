@@ -23,12 +23,12 @@
 
 <div class="jumbotron">
 
-    {% block content %} <H1> {{ user }} Profile </H1> 
+    {% block content %} <H1> {{ request.user.full_name }} Profile </H1> 
      <br/>
     <div class="card">
         <h3 class="card-title jumbotron">Borrowed Books</h3>
     {% for i in borrowed_books %}
-    <li> Borrowed by: {{i.user}} - Book title: {{i.book}}- Return date: {{i.return_date}} </li>
+    <li> Borrowed by: {{i.user.full_name}} - Book title: {{i.book}}- Return date: {{i.return_date}} </li>
     <a class="card-body" href="{% url 'library:return' i.id  %}" >Return</a>
     {% endfor %}
     {% endblock %}
