@@ -3,13 +3,15 @@ from django.views import View
 from .forms import UserRegistrationForm,VerifyCodeForm, LoginForm, VerifyCodeForm2
 import random
 from utils import send_otp_code
-from .models import CustomUser as User
+#from .models import CustomUser as User
 from .models import OtpCode
 from django.contrib import messages
 from datetime import timedelta, datetime
 import pytz
 from django.contrib.auth import authenticate , login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 utc = pytz.UTC
 
@@ -45,9 +47,10 @@ class UserRegisterView(View):
 
 
 class UserRegisterVerifyCodeView(View):
+
     form_class = VerifyCodeForm
     template_name = 'account/verify.html'
-    #utc = pytz.UTC
+    utc = pytz.UTC
 
     def get(self,request):
         form = self.form_class
@@ -63,6 +66,7 @@ class UserRegisterVerifyCodeView(View):
         otp_sent_time = code_instance.created2
         otp_expire_time = (otp_sent_time + timedelta(minutes=1)).replace(tzinfo=utc)
         now = datetime.now().replace(tzinfo=utc)
+        
         if form.is_valid():
             cd = form.cleaned_data
             if cd['code'] == code_instance.code and otp_expire_time > now :
@@ -71,8 +75,11 @@ class UserRegisterVerifyCodeView(View):
                                          user_session['full_name'],
                                          user_session['password'])
                 code_instance.delete()
-                messages.success(request,'registration success','success')
-                return redirect('library:home')
+                user = authenticate(request, phone=user_session['phone'], password=user_session['password'])
+                if isinstance(user, User):
+                    login(request, user)
+                    messages.success(request,'registration success','success')
+                    return redirect('library:home')
             else:
                 messages.error(request,'Expired or wrong code!','danger')
                 return redirect('account:verify_code')

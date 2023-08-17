@@ -30,7 +30,7 @@ def ReturnBook(request, borrowed_book_id):
     return redirect('library:home')
 
 
-class BorrowBook(LoginRequiredMixin,View):
+class BorrowBook(View):
     form_class = DateInputForm
     template_class = 'library/borrow.html'
     
@@ -42,23 +42,28 @@ class BorrowBook(LoginRequiredMixin,View):
     def post(self,request, books_id):
         form = self.form_class(request.POST)    
         book = get_object_or_404(Books, id=books_id)
-        user = User.objects.get(id=request.user.id)
-        borrowed_books_count = BorrowedBook.objects.filter(user=user).count()
-        if borrowed_books_count >= 5:
-            messages.error(request, "You have reached the maximum number of borrowed books.")
-        elif book.copies_available <= 0:
-            messages.error(request, "No copies of this book are currently available.")
-        elif form.is_valid():
-            selected_date = form.cleaned_data['Return_date']
-            borrowed_book = BorrowedBook(user=user, book=book, borrow_date=date.today(), return_date=selected_date)
-            borrowed_book.save()
-            book.copies_available -= 1
-            book.save()
-            messages.success(request, f"You have successfully borrowed '{book.title}'.")
+        user = request.user.id #User.objects.get(id=request.user.id)
+        if user:
+            borrowed_books_count = BorrowedBook.objects.filter(user=user).count()
+            if borrowed_books_count >= 5:
+                messages.error(request, "You have reached the maximum number of borrowed books.")
+            elif book.copies_available <= 0:
+                messages.error(request, "No copies of this book are currently available.")
+            elif form.is_valid():
+                selected_date = form.cleaned_data['Return_date']
+                borrowed_book = BorrowedBook(user=User.objects.get(id=user), book=book, borrow_date=date.today(), return_date=selected_date)
+                borrowed_book.save()
+                book.copies_available -= 1
+                book.save()
+                messages.success(request, f"You have successfully borrowed '{book.title}'.")
+            else:
+                self.form_class() 
+                
+            return redirect('library:home')
         else:
-            self.form_class() 
-            
-        return redirect('library:home')
+            messages.error(request, 'Pls Login', 'warning')
+            return redirect('account:User_Login')
+
 
 class HomePage(View):
     def get(self,request):
