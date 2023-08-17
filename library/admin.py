@@ -1,10 +1,14 @@
 from django.contrib import admin
-from .models import Books, BorrowedBook, User
+from .models import Books, BorrowedBook, User, Author, Genre
+
+admin.site.register(Author)
+admin.site.register(Genre) 
+
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-        list_display = ('first_name','last_name','email','phone','membership','expiration_date')
-        search_fields = ('last_name','first_name','membership')
+        list_display = ('full_name','email','phone','membership','expiration_date')
+        search_fields = ('full_name','membership')
         list_filter = ('membership','expiration_date')
         pass
         
