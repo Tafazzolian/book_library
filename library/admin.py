@@ -15,7 +15,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Books)
 class BooksAdmin(admin.ModelAdmin):
-        list_display = ('title','copies_available','author','genre','price','shabak')
+        list_display = ('title','copies_available','author','description','genre','price','shabak')
         search_fields = ('title','price','shabak')
         pass
 

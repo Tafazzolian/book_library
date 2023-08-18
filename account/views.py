@@ -11,8 +11,9 @@ import pytz
 from django.contrib.auth import authenticate , login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
-User = get_user_model()
 
+
+User = get_user_model()
 utc = pytz.UTC
 
 class UserRegisterView(View):
@@ -23,7 +24,6 @@ class UserRegisterView(View):
         form = self.form_class
         return render(request,self.template_name,{'form':form})
      
-
     def post(self,request):
         form = self.form_class(request.POST)
         if form.is_valid():
@@ -47,7 +47,6 @@ class UserRegisterView(View):
 
 
 class UserRegisterVerifyCodeView(View):
-
     form_class = VerifyCodeForm
     template_name = 'account/verify.html'
     utc = pytz.UTC
