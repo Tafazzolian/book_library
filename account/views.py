@@ -129,7 +129,7 @@ class UserLoginView(View):
 class UserLoginVerifyCodeView(View):
     form_class = VerifyCodeForm2
     template_name = 'account/loginverify.html'
-    utc = pytz.UTC
+    #utc = pytz.UTC
 
     def get(self,request):
         user_session = request.session['user_login_info']
