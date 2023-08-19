@@ -12,17 +12,16 @@
           <li class="nav-item">
             <a class="navbar-brand" aria-current="page" href="http://127.0.0.1:8000/admin">Admin-panel</a>
           </li>
-          
         </ul>
-        {% if not request.user.is_authenticated %}
-            <a class="navbar-brand" href=" {% url 'account:user_register' %} ">Register</a>
-            <a class="navbar-brand" href=" {% url 'account:User_Login' %} ">Login</a>
+      {% if not request.user.is_authenticated %}
+        <a class="navbar-brand" href=" {% url 'account:user_register' %} ">Register</a>
+        <a class="navbar-brand" href=" {% url 'account:User_Login' %} ">Login</a>
       {% endif %}
       {% if request.user.is_authenticated %}
-      <a class="navbar-brand" href=" {% url 'account:User_Logout' %} ">Logout</a>
+        <a class="navbar-brand" href=" {% url 'account:User_Logout' %} ">Logout</a>
       {% endif %}
       <form class="d-flex" role="search" method="GET" action="{% url 'library:search' %}">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search_input">
+        <input class="form-control me-2" type="search" placeholder="Book titles/description" aria-label="Search" name="search_input">
         <button class="btn btn-outline-success" type="submit">Search</button>
       </form>      
       </div>

@@ -49,7 +49,7 @@ class UserRegisterView(View):
 class UserRegisterVerifyCodeView(View):
     form_class = VerifyCodeForm
     template_name = 'account/verify.html'
-    utc = pytz.UTC
+    #utc = pytz.UTC
 
     def get(self,request):
         form = self.form_class
@@ -129,7 +129,7 @@ class UserLoginView(View):
 class UserLoginVerifyCodeView(View):
     form_class = VerifyCodeForm2
     template_name = 'account/loginverify.html'
-    utc = pytz.UTC
+    #utc = pytz.UTC
 
     def get(self,request):
         user_session = request.session['user_login_info']
@@ -148,7 +148,7 @@ class UserLoginVerifyCodeView(View):
         user = authenticate(request, phone=user_session['username'], password=user_session['password'])
         if form.is_valid():
             cd = form.cleaned_data
-            if cd['code'] == code_instance.code: #and otp_expire_time > now:
+            if cd['code'] == code_instance.code and otp_expire_time > now:
                 login(request, user)
                 messages.success(request, 'welcome!','success')
                 code_instance.delete()
