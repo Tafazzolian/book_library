@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from .forms import DateInputForm
+from django.db.models import Q
 
 
 class UserProfile(LoginRequiredMixin,View):
@@ -68,5 +69,16 @@ class BorrowBook(View):
 class HomePage(View):
     def get(self,request):
         books = Books.objects.all()
-        borrowed_books = BorrowedBook.objects.all()
-        return render(request,'main.html',{'books':books,'borrowed_books': borrowed_books,})
+        #borrowed_books = BorrowedBook.objects.all()
+        return render(request,'main.html',{'books':books})
+    
+class Search(View):
+    def get(self,request):
+        search_input = request.GET.get('search_input')
+        result = Books.objects.filter(Q(title__icontains=search_input) | Q(description__icontains=search_input))
+        return render(request,'search_result.html',{'result':result})
+    
+    def post(self):
+        pass
+
+

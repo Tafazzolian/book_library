@@ -1,0 +1,13 @@
+{% extends 'main.html' %}
+
+
+{% block content %} <H1> Tank book-library </H1>
+
+    <div class="card">
+        <h3 class="card-title jumbotron">Search Results</h3>
+
+        {% for i in result %}
+        <a class="card-body" href="{% url 'library:borrow' i.id  %}" >{{i.title}}- Description: {{i.description}}</a>
+       
+        {% endfor %}
+{% endblock %}
