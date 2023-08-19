@@ -2,7 +2,7 @@ from django.views import View
 from .models import Books,BorrowedBook, Genre, Author
 from account.models import CustomUser as User
 #from django.contrib.auth.models import User as MUser
-from datetime import date
+from datetime import date, timedelta
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
@@ -18,6 +18,14 @@ class UserProfile(LoginRequiredMixin,View):
     def get(self,request, user_id):
         user = User.objects.get(id=user_id)
         borrowed_books = BorrowedBook.objects.filter(user=user.id)
+        for i in borrowed_books:
+            if date.today()-i.borrow_date >= timedelta(days=7):
+                i.date_check = True
+            else:
+                i.date_check = False
+                i.save()
+                continue
+
         return render(request,self.template_class,{'borrowed_books': borrowed_books,'user':user})
 
 def ReturnBook(request, borrowed_book_id):
@@ -45,10 +53,14 @@ class BorrowBook(View):
         form = self.form_class(request.POST)    
         book = get_object_or_404(Books, id=books_id)
         user = request.user.id #User.objects.get(id=request.user.id)
+        if form.is_valid():
+            selected_date = form.cleaned_data['Return_date']
         if user:
             borrowed_books_count = BorrowedBook.objects.filter(user=user).count()
             if borrowed_books_count >= 5:
                 messages.error(request, "You have reached the maximum number of borrowed books.")
+            elif selected_date-date.today() >= timedelta(days=7):
+                messages.error(request, "You have can't keep a book more than 7 days.",'danger')
             elif book.copies_available <= 0:
                 messages.error(request, "No copies of this book are currently available.")
             elif form.is_valid():

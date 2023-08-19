@@ -32,6 +32,7 @@ class BorrowedBook(models.Model):
     book = models.ForeignKey(Books, on_delete=models.CASCADE)
     borrow_date = models.DateField()
     return_date = models.DateField(null=True, blank=True)
+    date_check = models.BooleanField(default=False) #say how many days left
 
     def __str__(self):
         return f"{self.user.full_name} borrowed {self.book.title}"
