@@ -26,7 +26,8 @@
 
     {% block content %} <H1> Book details </H1>
     <div class="card">
-        <h3 class="card-title jumbotron">{{ books.title }} - Copies available: {{books.copies_available}}</h3>
+        <h3 class="card-title jumbotron">Title: {{ book.title }} - Copies available: {{book.copies_available}} -Author: {{book.author}} </h3>
+        <ul class="card-title jumbotron">Price: {{ book.price }}$ - Description: {{ book.description }}  </ul>        
 
         <form action=" " method="post">
             {% csrf_token %}

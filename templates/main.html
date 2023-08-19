@@ -25,12 +25,41 @@
 <div class="jumbotron">
 
     {% block content %} <H1> Tank book-library </H1>
+    <form method="GET" action="{% url 'library:home' %}">
+        <label for="min_price">Minimum Price:</label>
+        <input type="text" id="min_price" name="min_price" placeholder="Min Price">
+      
+        <label for="max_price">Maximum Price:</label>
+        <input type="text" id="max_price" name="max_price" placeholder="Max Price">
+      
+        <label for="genre_id">Genre:</label>
+        <select name="genre_id">
+          <option value="">All Genres</option>
+          <option value="1">Science</option>
+          <option value="2">Novel</option>
+          <option value="5">Drama</option>
+          <option value="3">History</option>
+          <option value="4">Education</option>
+        </select>
 
+        <label for="born_city">Author's hometown:</label>
+        <select name="born_city">
+          <option value="">All Cities</option>
+          <option value="Qom">Qom</option>
+          <option value="Shiraz">Shiraz</option>
+          <option value="Tehran">Tehran</option>
+        </select>
+      
+        <button type="submit">Filter</button>
+      </form>
+      
+      
     <div class="card">
         <h3 class="card-title jumbotron">All books</h3>
 
         {% for i in books %}
-        <a class="card-body" href="{% url 'library:borrow' i.id  %}" >{{i.title}}- Copies available: {{i.copies_available}}</a>
+        <a class="card-body" href="{% url 'library:borrow' i.id  %}" >{{i.title}}
+           - Author: {{i.author}} - Genre: {{i.genre}} - Copies available: {{i.copies_available}} - Price: {{i.price}}$</a>
        
         {% endfor %}
         {% endblock %}

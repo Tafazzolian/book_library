@@ -80,7 +80,7 @@ class UserRegisterVerifyCodeView(View):
                     messages.success(request,'registration success','success')
                     return redirect('library:home')
             else:
-                messages.error(request,'Expired or wrong code!','danger')
+                messages.error(request,'Expired or wrong code! - pls find UserRegisterverify View and add or remove utc = pytz.UTC','danger')
                 return redirect('account:verify_code')
         return redirect('library:home')
 
@@ -129,7 +129,7 @@ class UserLoginView(View):
 class UserLoginVerifyCodeView(View):
     form_class = VerifyCodeForm2
     template_name = 'account/loginverify.html'
-    #utc = pytz.UTC
+    utc = pytz.UTC
 
     def get(self,request):
         user_session = request.session['user_login_info']
@@ -154,7 +154,7 @@ class UserLoginVerifyCodeView(View):
                 code_instance.delete()
                 return redirect('library:home')
             else:
-                messages.error(request,'Expired or wrong code!','danger')
+                messages.error(request,'Expired or wrong code! pls find UserLoginverify View and add or remove utc = pytz.UTC','danger')
                 return redirect('account:verify_code_login')
         return redirect('library:home')
 

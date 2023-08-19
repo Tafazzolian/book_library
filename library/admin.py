@@ -1,8 +1,15 @@
 from django.contrib import admin
 from .models import Books, BorrowedBook, User, Author, Genre
 
-admin.site.register(Author)
-admin.site.register(Genre) 
+@admin.register(Author)
+class AuthorAdmin(admin.ModelAdmin):
+        list_display = ('author','born_city','id')
+        pass
+
+@admin.register(Genre)
+class GenreAdmin(admin.ModelAdmin):
+        list_display = ('genre','id')
+        pass
 
 
 @admin.register(User)

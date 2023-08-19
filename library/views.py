@@ -1,5 +1,5 @@
 from django.views import View
-from .models import Books,BorrowedBook
+from .models import Books,BorrowedBook, Genre, Author
 from account.models import CustomUser as User
 #from django.contrib.auth.models import User as MUser
 from datetime import date
@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from .forms import DateInputForm
 from django.db.models import Q
+from django.core.paginator import Paginator
 
 
 class UserProfile(LoginRequiredMixin,View):
@@ -38,7 +39,7 @@ class BorrowBook(View):
     def get(self,request, books_id):
         books = get_object_or_404(Books, id=books_id)
         form = self.form_class()
-        return render(request,self.template_class,{'form':form,'books':books})
+        return render(request,self.template_class,{'form':form,'book':books})
     
     def post(self,request, books_id):
         form = self.form_class(request.POST)    
@@ -64,13 +65,32 @@ class BorrowBook(View):
         else:
             messages.error(request, 'Pls Login', 'warning')
             return redirect('account:User_Login')
-
+    
 
 class HomePage(View):
-    def get(self,request):
+    def get(self, request):
+        min_price = request.GET.get('min_price')
+        max_price = request.GET.get('max_price')
+        genre_id = request.GET.get('genre_id')
+        born_city = request.GET.get('born_city')
+        page_number = request.GET.get('page')
+
         books = Books.objects.all()
-        #borrowed_books = BorrowedBook.objects.all()
-        return render(request,'main.html',{'books':books})
+        paginator = Paginator(books, 10)
+        template_page = paginator.get_page(page_number) #we send this to our template for pagination
+        
+
+        if born_city:
+            books = books.filter(author__born_city=born_city)
+
+        if min_price and max_price:
+            books = books.filter(price__range=(min_price, max_price))
+
+        if genre_id:
+            books = books.filter(genre__id=genre_id)
+
+        return render(request, 'main.html', {'books': books})
+
     
 class Search(View):
     def get(self,request):
