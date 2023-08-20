@@ -52,12 +52,15 @@ class BorrowBook(View):
     def post(self,request, books_id):
         form = self.form_class(request.POST)    
         book = get_object_or_404(Books, id=books_id)
-        user = User.objects.get(id=request.user.id)
+        user_auth = request.user.id
         if form.is_valid():
             selected_date = form.cleaned_data['Return_date']
-        if user:
+        if user_auth:
+            user = User.objects.get(id=request.user.id)
             #borrowed_books_count = BorrowedBook.objects.filter(user=user).count()
-            if user.membership=='V' and selected_date-date.today() >= timedelta(days=14):
+            if selected_date-date.today() < timedelta(days=0):
+                messages.error(request, "You have can't travel in Time!",'danger')
+            elif user.membership=='V' and selected_date-date.today() >= timedelta(days=14):
                 messages.error(request, "You have can't keep a book more than 14 days.",'danger')
             elif user.membership=='N' and selected_date-date.today() >= timedelta(days=7):
                 messages.error(request, "You have can't keep a book more than 7 days.",'danger')
@@ -71,7 +74,8 @@ class BorrowBook(View):
                 book.save()
                 messages.success(request, f"You have successfully borrowed '{book.title}'.")
             else:
-                self.form_class() 
+                self.form_class()
+                #return redirect('library:borrow')
                 
             return redirect('library:home')
         else:
