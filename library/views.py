@@ -52,20 +52,20 @@ class BorrowBook(View):
     def post(self,request, books_id):
         form = self.form_class(request.POST)    
         book = get_object_or_404(Books, id=books_id)
-        user = request.user.id #User.objects.get(id=request.user.id)
+        user = User.objects.get(id=request.user.id)
         if form.is_valid():
             selected_date = form.cleaned_data['Return_date']
         if user:
-            borrowed_books_count = BorrowedBook.objects.filter(user=user).count()
-            if borrowed_books_count >= 5:
-                messages.error(request, "You have reached the maximum number of borrowed books.")
-            elif selected_date-date.today() >= timedelta(days=7):
+            #borrowed_books_count = BorrowedBook.objects.filter(user=user).count()
+            if user.membership=='V' and selected_date-date.today() >= timedelta(days=14):
+                messages.error(request, "You have can't keep a book more than 14 days.",'danger')
+            elif user.membership=='N' and selected_date-date.today() >= timedelta(days=7):
                 messages.error(request, "You have can't keep a book more than 7 days.",'danger')
             elif book.copies_available <= 0:
                 messages.error(request, "No copies of this book are currently available.")
             elif form.is_valid():
                 selected_date = form.cleaned_data['Return_date']
-                borrowed_book = BorrowedBook(user=User.objects.get(id=user), book=book, borrow_date=date.today(), return_date=selected_date)
+                borrowed_book = BorrowedBook(user=user, book=book, borrow_date=date.today(), return_date=selected_date)
                 borrowed_book.save()
                 book.copies_available -= 1
                 book.save()
