@@ -63,8 +63,8 @@ class UserRegisterVerifyCodeView(View):
         user_session = request.session['user_register_info']
         code_instance = OtpCode.objects.get(phone=user_session['phone'])
         otp_sent_time = code_instance.created2
-        otp_expire_time = (otp_sent_time + timedelta(minutes=1)).replace(tzinfo=utc)
-        now = datetime.now().replace(tzinfo=utc)
+        otp_expire_time = (otp_sent_time + timedelta(minutes=1))#.replace(tzinfo=utc)
+        now = datetime.now()#.replace(tzinfo=utc)
         
         if form.is_valid():
             cd = form.cleaned_data
@@ -143,8 +143,8 @@ class UserLoginVerifyCodeView(View):
         user_session = request.session['user_login_info']
         code_instance = OtpCode.objects.get(phone=user_session['username'])
         otp_sent_time = code_instance.created2
-        otp_expire_time = (otp_sent_time + timedelta(minutes=1)).replace(tzinfo=utc)
-        now = datetime.now().replace(tzinfo=utc)
+        otp_expire_time = (otp_sent_time + timedelta(minutes=1))#.replace(tzinfo=utc)
+        now = datetime.now()#.replace(tzinfo=utc)
         user = authenticate(request, phone=user_session['username'], password=user_session['password'])
         if form.is_valid():
             cd = form.cleaned_data

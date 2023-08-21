@@ -15,6 +15,12 @@ from django.core.paginator import Paginator
 class UserProfile(LoginRequiredMixin,View):
     template_class = 'library/user_profile.html'
 
+    def dispatch(self, request,user_id):
+        if user_id != request.user.id:
+            messages.error(request, 'No cheating!', 'danger')
+            return redirect('library:home')
+        return super().dispatch(request, user_id)
+
     def get(self,request, user_id):
         user = User.objects.get(id=user_id)
         borrowed_books = BorrowedBook.objects.filter(user=user.id)
@@ -28,16 +34,26 @@ class UserProfile(LoginRequiredMixin,View):
 
         return render(request,self.template_class,{'borrowed_books': borrowed_books,'user':user})
 
-def ReturnBook(request, borrowed_book_id):
-    borrowed_book = get_object_or_404(BorrowedBook, id=borrowed_book_id)
-    book = borrowed_book.book
-    #borrowed_book.return_date = date.today()
-    book.copies_available += 1
-    book.save()
-    borrowed_book.delete()
-    #borrowed_book.save()
-    messages.success(request, "You have successfully returned the book.")
-    return redirect('library:home')
+class ReturnBook(LoginRequiredMixin,View):
+    template_class = 'library/user_profile.html'
+    
+    def dispatch(self, request,borrowed_book_id):
+        borrow_id = get_object_or_404(BorrowedBook, id=borrowed_book_id)
+        if borrow_id.user.id != request.user.id:
+            messages.error(request, 'No cheating!', 'danger')
+            return redirect('library:home')
+        return super().dispatch(request, borrowed_book_id)
+    
+    def get(self, request, borrowed_book_id):
+        borrowed_book = get_object_or_404(BorrowedBook, id=borrowed_book_id)
+        book = borrowed_book.book
+        #borrowed_book.return_date = date.today()
+        book.copies_available += 1
+        book.save()
+        borrowed_book.delete()
+        #borrowed_book.save()
+        messages.success(request, "You have successfully returned the book.")
+        return redirect('library:home')
 
 
 class BorrowBook(View):
@@ -45,9 +61,9 @@ class BorrowBook(View):
     template_class = 'library/borrow.html'
     
     def get(self,request, books_id):
-        books = get_object_or_404(Books, id=books_id)
+        book = get_object_or_404(Books, id=books_id)
         form = self.form_class()
-        return render(request,self.template_class,{'form':form,'book':books})
+        return render(request,self.template_class,{'form':form,'book':book})
     
     def post(self,request, books_id):
         form = self.form_class(request.POST)    
@@ -61,9 +77,9 @@ class BorrowBook(View):
             if selected_date-date.today() < timedelta(days=0):
                 messages.error(request, "You have can't travel in Time!",'danger')
             elif user.membership=='V' and selected_date-date.today() >= timedelta(days=14):
-                messages.error(request, "You have can't keep a book more than 14 days.",'danger')
+                messages.error(request, "VIP users can borrow a book for max 14 days.",'danger')
             elif user.membership=='N' and selected_date-date.today() >= timedelta(days=7):
-                messages.error(request, "You have can't keep a book more than 7 days.",'danger')
+                messages.error(request, "NORMAL users can borrow a book for max 7 days.",'danger')
             elif book.copies_available <= 0:
                 messages.error(request, "No copies of this book are currently available.")
             elif form.is_valid():
