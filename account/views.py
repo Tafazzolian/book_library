@@ -172,3 +172,25 @@ class UserLogoutView(LoginRequiredMixin,View):
         logout(request)
         messages.info(request,'Bye!')
         return redirect('library:home')
+
+class LoginApiView(APIView):
+
+    def get(self,request):
+        return Response('This is the login API - Dont import anythin for POST - Data = {phone:1507, password:admin,otp:otp} - Just press POST')
+
+    def post(self, request, *args, **kwargs):
+        otp = random.randint(1000, 9999)
+        data = {'phone':1507, 'password':'admin','otp':otp}
+        send_otp_code(data['phone'], otp)
+        if data['otp'] == otp:
+            print(otp,'OTP verified')
+        user = User.objects.get(phone= data['phone'])
+        if user:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'message': 'JWT token created',
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            })
+        else:
+            return Response('Invalid OTP', status=400)
