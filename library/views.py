@@ -105,18 +105,21 @@ class HomePage(View):
         max_price = request.GET.get('max_price')
         genre_id = request.GET.get('genre_id')
         born_city = request.GET.get('born_city')
-        page_number = request.GET.get('page')
+        Price = request.GET.get('price')
 
-        books = Books.objects.all()
-        paginator = Paginator(books, 10)
-        template_page = paginator.get_page(page_number) #we send this to our template for pagination
+        #page_number = request.GET.get('page')
+        #paginator = Paginator(books, 10)
+        #template_page = paginator.get_page(page_number) #we send this to our template for pagination
+        books = Books.objects.values('title','genre','author','price','id')
         
-
         if born_city:
             books = books.filter(author__born_city=born_city)
 
         if min_price and max_price:
             books = books.filter(price__range=(min_price, max_price))
+
+        if Price:
+            books = books.order_by(Price)
 
         if genre_id:
             books = books.filter(genre__id=genre_id)

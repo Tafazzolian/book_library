@@ -8,9 +8,8 @@ from .models import OtpCode
 from django.contrib import messages
 from datetime import timedelta, datetime
 import pytz
-from django.contrib.auth import authenticate , login, logout
+from django.contrib.auth import authenticate, get_user_model , login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import get_user_model
 
 
 User = get_user_model()

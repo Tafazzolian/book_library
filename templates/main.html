@@ -26,10 +26,10 @@
 
     {% block content %} <H1> Tank book-library </H1>
     <form method="GET" action="{% url 'library:home' %}">
-        <label for="min_price">Minimum Price:</label>
+        <label for="min_price">Min-Price:</label>
         <input type="text" id="min_price" name="min_price" placeholder="Min Price">
       
-        <label for="max_price">Maximum Price:</label>
+        <label for="max_price">Max-Price:</label>
         <input type="text" id="max_price" name="max_price" placeholder="Max Price">
       
         <label for="genre_id">Genre:</label>
@@ -49,6 +49,13 @@
           <option value="Shiraz">Shiraz</option>
           <option value="Tehran">Tehran</option>
         </select>
+
+        <label for="price">Sort by:</label>
+        <select name="price">
+          <option value="">Price</option>
+          <option value="price">Low to high</option>
+          <option value="-price">High to low</option>
+        </select>
       
         <button type="submit">Filter</button>
       </form>
@@ -59,7 +66,7 @@
 
         {% for i in books %}
         <a class="card-body" href="{% url 'library:borrow' i.id  %}" >{{i.title}}
-           - Author: {{i.author}} - Genre: {{i.genre}} - Copies available: {{i.copies_available}} - Price: {{i.price}}$</a>
+           - Genre: {{i.genre}} - Copies available: {{i.copies_available}} - Price: {{i.price}}$</a>
        
         {% endfor %}
         {% endblock %}
