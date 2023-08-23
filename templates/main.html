@@ -65,8 +65,8 @@
         <h3 class="card-title jumbotron">All books</h3>
 
         {% for i in books %}
-        <a class="card-body" href="{% url 'library:borrow' i.id  %}" >{{i.title}}
-           - Genre: {{i.genre}} - Copies available: {{i.copies_available}} - Price: {{i.price}}$</a>
+        <a class="card-body" href="{% url 'library:borrow' i.id  %}" >Title: {{i.title}}
+           - Genre: {{i.genre__genre}} - Copies available: {{i.copies_available}} - Price: {{i.price}}$</a>
        
         {% endfor %}
         {% endblock %}

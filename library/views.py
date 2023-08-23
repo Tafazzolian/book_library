@@ -111,7 +111,7 @@ class HomePage(View):
         #page_number = request.GET.get('page')
         #paginator = Paginator(books, 10)
         #template_page = paginator.get_page(page_number)
-        books = Books.objects.values('title','genre','author','price','id','copies_available')
+        books = Books.objects.values('title','genre__genre','author','price','id','copies_available')
         
         if born_city:
             books = books.filter(author__born_city=born_city)
