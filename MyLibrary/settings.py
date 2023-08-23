@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'library',
     'account',
-
     
 ]
 
@@ -136,4 +135,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'account.CustomUser'
-LOGIN_URL = '/account/Login'
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+#LOGIN_URL = '/account/Login'

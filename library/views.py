@@ -106,10 +106,11 @@ class HomePage(View):
         genre_id = request.GET.get('genre_id')
         born_city = request.GET.get('born_city')
         Price = request.GET.get('price')
-
+        
+        #Pagination
         #page_number = request.GET.get('page')
         #paginator = Paginator(books, 10)
-        #template_page = paginator.get_page(page_number) #we send this to our template for pagination
+        #template_page = paginator.get_page(page_number)
         books = Books.objects.values('title','genre','author','price','id')
         
         if born_city:

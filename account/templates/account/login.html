@@ -7,6 +7,7 @@
     {{ form.as_p }}
     <input type="submit" value="Login">
     </form>
-</br> <a class="navbar-brand" href=" {% url 'account:user_register' %} ">Don't have an account? register here</a>
+    
+</br> <p>Don't have an account?</p> <a class="navbar-brand" href=" {% url 'account:user_register' %} ">register here</a>
 
 {% endblock %}

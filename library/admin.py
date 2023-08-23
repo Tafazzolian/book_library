@@ -1,6 +1,9 @@
 from django.contrib import admin
 from .models import Books, BorrowedBook, User, Author, Genre
 
+admin.site.site_header = 'Tank book library'
+admin.site.index_title = 'Admin Panel'
+
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
         list_display = ('author','born_city','id')
