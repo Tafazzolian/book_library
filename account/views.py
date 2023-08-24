@@ -3,7 +3,6 @@ from django.views import View
 from .forms import UserRegistrationForm,VerifyCodeForm, LoginForm, VerifyCodeForm2
 import random
 from utils import send_otp_code
-#from .models import CustomUser as User
 from .models import OtpCode
 from django.contrib import messages
 from datetime import timedelta, datetime
@@ -25,7 +24,7 @@ class UserRegisterView(View):
     def get(self,request):
         form = self.form_class
         return render(request,self.template_name,{'form':form})
-     
+    
     def post(self,request):
         form = self.form_class(request.POST)
         if form.is_valid():
@@ -136,16 +135,6 @@ class UserLoginVerifyCodeView(View):
         code = request.session['user_login_info']
         form = self.form_class
         return render(request,self.template_name,{'form':form,'code':code['otp']})
-    
-        '''data = {'form': form, 'code': code}
-        #api_url = 'http://127.0.0.1:8000/Login-Verify/?format=json'
-        #response = Response.render(data) #requests.get(api_url)
-        return Response(data)
-        if Response.status_code == 200:
-            api_data = response.json()
-            return render(request,self.template_name,{'form':form,'code':code, 'api_data':data})
-        else:
-            return redirect('account:User_Login')'''
 
     def post(self,request):
         form = self.form_class(request.POST)
@@ -187,10 +176,13 @@ class LoginApiView(APIView):
         user = User.objects.get(phone= data['phone'])
         if user:
             refresh = RefreshToken.for_user(user)
+            link = 'http://127.0.0.1:8000'
+            login(request, user)
             return Response({
                 'message': 'JWT token created',
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'Go back to site':link,
             })
         else:
             return Response('Invalid OTP', status=400)

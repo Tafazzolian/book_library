@@ -5,3 +5,6 @@ class DateInputForm(forms.Form):
 
 class ReturnBookForm(forms.Form):
     pass
+
+class BuyVip(forms.Form):
+    pass

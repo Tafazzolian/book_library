@@ -14,7 +14,6 @@ class CustomUser(AbstractBaseUser):
     full_name = models.CharField(max_length=100,unique=True,null=True)
     email = models.EmailField(unique=True)
     expiration_date = models.DateField(null=True)
-    #choice field
     membership = models.CharField(max_length=1, choices= MEMBERSHIP_CHOICES, default= MEMBERSHIP_NORMAL)
     phone = models.CharField(max_length=11, unique=True, null=True)
     is_active = models.BooleanField(default=True)

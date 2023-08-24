@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
 
-    <title> {% block title %} {{user}} {% endblock %} </title>
+    <title> {% block title %} Subscription {% endblock %} </title>
 
     <!-- CSS only -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -23,15 +23,9 @@
 
 <div class="jumbotron">
 
-    {% block content %} <H1> {{ request.user.full_name }} Profile</H1>
-    {% if user.membership == 'V'%} <H4> VIP membership </H4> {% else %} <H4> NORMAL membership </H4> {% endif%}
-     <br/>
-    <div class="card">
-        <h3 class="card-title jumbotron">Borrowed Books</h3>
-    {% for i in borrowed_books %}
-    <li> Borrowed by: {{i.user.full_name}} - Book title: {{i.book}}- Return date: {{i.return_date}}</li>
-    <a class="card-body" href="{% url 'library:return' i.id  %}" >Return {{i.book}}</a>
-    {% endfor %}
+    {% block content %} <H1> Welcome {{ request.user.full_name }} </H1>
+    <H4>The price for buying a vip membership is 2000,000 Rials.</H4>
+    <a class="card-body" href="{% url 'library:buy' user_id  %}" >Buy vip membership</a>
     {% endblock %}
 </div>
 

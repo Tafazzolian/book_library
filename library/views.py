@@ -1,12 +1,10 @@
 from django.views import View
-from .models import Books,BorrowedBook, Genre, Author
+from .models import Books,BorrowedBook
 from account.models import CustomUser as User
-#from django.contrib.auth.models import User as MUser
 from datetime import date, timedelta
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404,render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.shortcuts import render, redirect
 from .forms import DateInputForm
 from django.db.models import Q
 from django.core.paginator import Paginator
@@ -24,14 +22,6 @@ class UserProfile(LoginRequiredMixin,View):
     def get(self,request, user_id):
         user = User.objects.get(id=user_id)
         borrowed_books = BorrowedBook.objects.filter(user=user.id)
-        for i in borrowed_books:
-            if date.today()-i.borrow_date >= timedelta(days=7):
-                i.date_check = True
-            else:
-                i.date_check = False
-                i.save()
-                continue
-
         return render(request,self.template_class,{'borrowed_books': borrowed_books,'user':user})
 
 class ReturnBook(LoginRequiredMixin,View):
@@ -47,11 +37,9 @@ class ReturnBook(LoginRequiredMixin,View):
     def get(self, request, borrowed_book_id):
         borrowed_book = get_object_or_404(BorrowedBook, id=borrowed_book_id)
         book = borrowed_book.book
-        #borrowed_book.return_date = date.today()
         book.copies_available += 1
         book.save()
         borrowed_book.delete()
-        #borrowed_book.save()
         messages.success(request, "You have successfully returned the book.")
         return redirect('library:home')
 
@@ -98,6 +86,36 @@ class BorrowBook(View):
             messages.error(request, 'Pls Login', 'warning')
             return redirect('account:User_Login')
     
+class Subscription(View):
+  
+    def get(self,request):
+        try:
+            user = User.objects.get(id=request.user.id)
+            return render(request, 'library/sub.html',{'user_id':user.id})
+        except:
+            user = 0
+            return render(request, 'library/sub.html',{'user_id':user})
+
+    def post(self,request):
+        pass
+
+class Buy(View):
+    def get(self,request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            if user.membership == 'V':
+                messages.warning(request, 'You are a VIP member. No need to buy vip membership')
+                return redirect('library:home')
+            else:
+                user.membership = 'V' #User(id=user,membership='V')
+                user.save()
+                messages.success(request,'You are now a VIP member')
+                return redirect('library:home')
+        except:
+            messages.error(request, 'Pls Login first', 'warning')
+            return redirect('account:User_Login')
+
+
 
 class HomePage(View):
     def get(self, request):
