@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from django.shortcuts import get_object_or_404,render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from .forms import DateInputForm
+from .forms import DateInputForm, BooksCrudForm
 from django.db.models import Q
 from django.core.paginator import Paginator
 
@@ -87,7 +87,6 @@ class BorrowBook(View):
             return redirect('account:User_Login')
     
 class Subscription(View):
-  
     def get(self,request):
         try:
             user = User.objects.get(id=request.user.id)
@@ -95,9 +94,6 @@ class Subscription(View):
         except:
             user = 0
             return render(request, 'library/sub.html',{'user_id':user})
-
-    def post(self,request):
-        pass
 
 class Buy(View):
     def get(self,request, user_id):
@@ -108,13 +104,13 @@ class Buy(View):
                 return redirect('library:home')
             else:
                 user.membership = 'V' #User(id=user,membership='V')
+                user.expiration_date = date.today()+timedelta(days=31)
                 user.save()
                 messages.success(request,'You are now a VIP member')
                 return redirect('library:home')
         except:
             messages.error(request, 'Pls Login first', 'warning')
             return redirect('account:User_Login')
-
 
 
 class HomePage(View):
@@ -155,4 +151,38 @@ class Search(View):
     def post(self):
         pass
 
+class BooksCrud(View):
+    form_class = BooksCrudForm
+    template_class = 'library/bcrud.html'
+
+    def get(self,request,book_id):
+        books = Books.objects.values('id','title')
+        if book_id == 0:
+            form = self.form_class
+            return render(request,self.template_class,{'form':form,'books':books})
+        else:
+            instance = get_object_or_404(Books, pk=book_id)
+            form = self.form_class(instance=instance)
+            return render(request,self.template_class,{'form':form,'books':books})
+
+        
+    def post(self,request,book_id):
+        form = self.form_class(request.POST)
+        if book_id == 0 and form.is_valid():
+            form.save()
+            messages.success(request, 'New Book Added successfuly')
+            return redirect('library:home')
+        elif book_id != 0 and form.is_valid(request.POST,instance = get_object_or_404(Books, pk=book_id)):
+            updated_book = form.save(commit=False)
+            updated_book.save()
+            messages.success(request,'update success','success')
+            return redirect('library:home')
+
+
+class BookDelete(View):
+    def get(self,request,book_id):
+        book = get_object_or_404(Books, id=book_id)
+        book.delete()
+        messages.warning(request, f'{book.title} deleted!')
+        return redirect('library:home')        
 

@@ -1,0 +1,41 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<div class="card">
+    <h3 class="card-title jumbotron"> Books CRUD Page</h3> <a href="{% url 'library:bcrud' 0  %}" class="btn btn-info">Add a new book </a>
+    <form id="filterForm" method="GET" action="">
+        <label for="book_id">Choose a book to edit:</label>
+        <select name="book_id" id="bookSelect">
+            {% for j in books %}
+                <option value="{{ j.id }}">{{ j.title }}</option>
+            {% endfor %}
+        </select>
+    
+        <button type="submit">Filter</button>
+    </form> 
+    
+    
+    <script>
+        const filterForm = document.getElementById('filterForm');
+        const bookSelect = document.getElementById('bookSelect');
+    
+        filterForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const selectedBookId = bookSelect.value;
+            filterForm.action = `{% url 'library:bcrud' 0 %}`.replace('0', selectedBookId);
+            filterForm.submit();
+        });
+    </script>
+
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save" class="btn btn-info">
+    </form>
+    
+    {% if form.instance.id != None and form.instance.id != 0 %}
+        <a href="{% url 'library:bdelete' form.instance.id %}" class="btn btn-danger" style="width: 10%;">Delete</a>
+    {% endif %}
+{% endblock %}
+

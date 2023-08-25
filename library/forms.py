@@ -1,4 +1,5 @@
 from django import forms
+from .models import Books
 
 class DateInputForm(forms.Form):
     Return_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
@@ -6,5 +7,7 @@ class DateInputForm(forms.Form):
 class ReturnBookForm(forms.Form):
     pass
 
-class BuyVip(forms.Form):
-    pass
+class BooksCrudForm(forms.ModelForm):
+    class Meta:
+        model = Books
+        fields = '__all__'

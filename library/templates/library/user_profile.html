@@ -23,16 +23,18 @@
 
 <div class="jumbotron">
 
-    {% block content %} <H1> {{ request.user.full_name }} Profile</H1>
-    {% if user.membership == 'V'%} <H4> VIP membership </H4> {% else %} <H4> NORMAL membership </H4> {% endif%}
+    {% block content %} <H1> {{ user.full_name }}'s Profile</H1>
+    {% if user.membership == 'V'%} <H4> VIP membership - Your membership expires on {{user.expiration_date}} </H4> {% else %} <H4> NORMAL membership </H4> {% endif%}
      <br/>
     <div class="card">
         <h3 class="card-title jumbotron">Borrowed Books</h3>
     {% for i in borrowed_books %}
     <li> Borrowed by: {{i.user.full_name}} - Book title: {{i.book}}- Return date: {{i.return_date}}</li>
     <a class="card-body" href="{% url 'library:return' i.id  %}" >Return {{i.book}}</a>
+
     {% endfor %}
     {% endblock %}
+
 </div>
 
 </body>
