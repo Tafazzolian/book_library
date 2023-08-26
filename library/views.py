@@ -177,7 +177,9 @@ class BooksCrud(View):
             form.save()
             messages.success(request, 'New Book Added successfuly')
             return redirect('library:home')
-        elif book_id != 0 and form.is_valid(request.POST,instance = get_object_or_404(Books, pk=book_id)):
+        elif book_id != 0:
+            instance = get_object_or_404(Books, pk=book_id)
+            form = self.form_class(request.POST, instance=instance)
             updated_book = form.save(commit=False)
             #any additional fields that were missing in the form must be filled here
             updated_book.save()
