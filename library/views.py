@@ -7,6 +7,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from .forms import DateInputForm, BooksCrudForm
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import BookSerializer
 from django.core.paginator import Paginator
 
 
@@ -61,26 +66,26 @@ class BorrowBook(View):
             selected_date = form.cleaned_data['Return_date']
         if user_auth:
             user = User.objects.get(id=request.user.id)
-            #borrowed_books_count = BorrowedBook.objects.filter(user=user).count()
             if selected_date-date.today() < timedelta(days=0):
                 messages.error(request, "You have can't travel in Time!",'danger')
+
             elif user.membership=='V' and selected_date-date.today() >= timedelta(days=14):
                 messages.error(request, "VIP users can borrow a book for max 14 days.",'danger')
+
             elif user.membership=='N' and selected_date-date.today() >= timedelta(days=7):
                 messages.error(request, "NORMAL users can borrow a book for max 7 days.",'danger')
+
             elif book.copies_available <= 0:
                 messages.error(request, "No copies of this book are currently available.")
+
             elif form.is_valid():
-                selected_date = form.cleaned_data['Return_date']
                 borrowed_book = BorrowedBook(user=user, book=book, borrow_date=date.today(), return_date=selected_date)
                 borrowed_book.save()
                 book.copies_available -= 1
                 book.save()
                 messages.success(request, f"You have successfully borrowed '{book.title}'.")
             else:
-                self.form_class()
-                #return redirect('library:borrow')
-                
+                self.form_class()                
             return redirect('library:home')
         else:
             messages.error(request, 'Pls Login', 'warning')
@@ -100,7 +105,7 @@ class Buy(View):
         try:
             user = User.objects.get(id=user_id)
             if user.membership == 'V':
-                messages.warning(request, 'You are a VIP member. No need to buy vip membership')
+                messages.warning(request, 'You are a VIP member. No need to buy a vip membership')
                 return redirect('library:home')
             else:
                 user.membership = 'V' #User(id=user,membership='V')
@@ -174,15 +179,54 @@ class BooksCrud(View):
             return redirect('library:home')
         elif book_id != 0 and form.is_valid(request.POST,instance = get_object_or_404(Books, pk=book_id)):
             updated_book = form.save(commit=False)
+            #any additional fields that were missing in the form must be filled here
             updated_book.save()
             messages.success(request,'update success','success')
             return redirect('library:home')
 
-
 class BookDelete(View):
+    @method_decorator(login_required)
     def get(self,request,book_id):
-        book = get_object_or_404(Books, id=book_id)
-        book.delete()
-        messages.warning(request, f'{book.title} deleted!')
+        if request.user.is_admin :
+            book = get_object_or_404(Books, id=book_id)
+            book.delete()
+            messages.warning(request, f'{book.title} deleted!','danger')
+        else:
+            messages.warning(request,'You are not an Admin!')
         return redirect('library:home')        
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import Books
+from .serializers import BookSerializer
+
+class BookList(APIView):
+
+    def get(self,request):
+        books = Books.objects.all()
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data)
+
+
+    def post(self, request):
+        min_price = request.data.get('min_price')
+        max_price = request.data.get('max_price')
+        genre_id = request.data.get('genre_id')
+        born_city = request.data.get('born_city')
+        Price = request.data.get('price')
+
+        books = Books.objects.all()
+        if born_city:
+            books = books.filter(author__born_city=born_city)
+
+        if min_price and max_price:
+            books = books.filter(price__range=(min_price, max_price))
+
+        if Price:
+            books = books.order_by(Price)
+
+        if genre_id:
+            books = books.filter(genre__id=genre_id)
+
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data)

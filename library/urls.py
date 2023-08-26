@@ -11,6 +11,7 @@ urlpatterns = [
     path('return/<int:borrowed_book_id>/',views.ReturnBook.as_view() , name='return'),
     path('users/<int:user_id>/',views.UserProfile.as_view(), name='user'),
     path('search/',views.Search.as_view(), name='search'),
+    path('api/book-list/',views.BookList.as_view(),name='bookapi'),
     path('',views.HomePage.as_view(), name='home'),
 
 ]

@@ -29,17 +29,16 @@ class UserRegisterView(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            code_dup_check = OtpCode.objects.filter(phone=cd['phone'])
-            if code_dup_check.exists():
-                code_dup_check.delete()
             random_code = random.randint(1000,9999)
             send_otp_code(cd['phone'],random_code)
-            OtpCode.objects.create(phone=cd['phone'],code=random_code)
+            otp_created = datetime.now().isoformat()
             request.session['user_register_info'] = {
                 'phone': cd['phone'],
                 'email':cd['email'],
                 'full_name':cd['full_name'],
                 'password':cd['password'],
+                'otp':random_code,
+                'otp_time':otp_created,
             }
             messages.success(request,'we sent you a code','success')
             return redirect('account:verify_code')
@@ -55,26 +54,25 @@ class UserRegisterVerifyCodeView(View):
     def get(self,request):
         form = self.form_class
         user_session = request.session['user_register_info']
-        code_instance = OtpCode.objects.get(phone=user_session['phone'])
-        code = code_instance.code
+        code = user_session['otp']
         return render(request,self.template_name,{'form':form,'code':code})
 
     def post(self,request):
         form = self.form_class(request.POST)
         user_session = request.session['user_register_info']
-        code_instance = OtpCode.objects.get(phone=user_session['phone'])
-        otp_sent_time = code_instance.created2
+        code = user_session['otp']
+        otp_sent_time_raw = user_session['otp_time']
+        otp_sent_time = datetime.fromisoformat(otp_sent_time_raw)
         otp_expire_time = (otp_sent_time + timedelta(minutes=1))#.replace(tzinfo=utc)
         now = datetime.now()#.replace(tzinfo=utc)
         
         if form.is_valid():
             cd = form.cleaned_data
-            if cd['code'] == code_instance.code and otp_expire_time > now :
+            if cd['code'] == code and otp_expire_time > now :
                 User.objects.create_user(user_session['phone'],
                                          user_session['email'],
                                          user_session['full_name'],
                                          user_session['password'])
-                code_instance.delete()
                 user = authenticate(request, phone=user_session['phone'], password=user_session['password'])
                 if isinstance(user, User):
                     login(request, user)

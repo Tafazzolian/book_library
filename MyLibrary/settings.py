@@ -140,4 +140,4 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
-#LOGIN_URL = '/account/Login'
+LOGIN_URL = '/Login/'

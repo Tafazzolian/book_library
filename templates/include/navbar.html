@@ -12,6 +12,7 @@
           <li class="nav-item">
             <a class="navbar-brand" aria-current="page" href="http://127.0.0.1:8000/admin">Admin-panel</a>
             <a class="navbar-brand" aria-current="page" href="{% url 'library:bcrud' 0 %}">Books Crud</a>
+            <a class="navbar-brand" aria-current="page" href="{% url 'library:bookapi' %}">BooksList-API</a>
           </li>
         </ul>
       {% if not request.user.is_authenticated %}
