@@ -197,10 +197,7 @@ class BookDelete(View):
             messages.warning(request,'You are not an Admin!')
         return redirect('library:home')        
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import Books
-from .serializers import BookSerializer
+
 
 class BookList(APIView):
 
@@ -209,26 +206,29 @@ class BookList(APIView):
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data)
 
-
     def post(self, request):
-        min_price = request.data.get('min_price')
-        max_price = request.data.get('max_price')
-        genre_id = request.data.get('genre_id')
-        born_city = request.data.get('born_city')
-        Price = request.data.get('price')
+        serializer = BookSerializer(data=request.data)
+        if serializer.is_valid():
+            min_price = request.data.get('min_price')
+            max_price = request.data.get('max_price')
+            genre_id = request.data.get('genre_id')
+            born_city = request.data.get('born_city')
+            price = request.data.get('price')
 
-        books = Books.objects.all()
-        if born_city:
-            books = books.filter(author__born_city=born_city)
+            books = Books.objects.all()
+            if born_city:
+                books = books.filter(author__born_city=born_city)
 
-        if min_price and max_price:
-            books = books.filter(price__range=(min_price, max_price))
+            if min_price and max_price:
+                books = books.filter(price__range=(min_price, max_price))
 
-        if Price:
-            books = books.order_by(Price)
+            if price:
+                books = books.order_by(price)
 
-        if genre_id:
-            books = books.filter(genre__id=genre_id)
+            if genre_id:
+                books = books.filter(genre__id=genre_id)
 
-        serializer = BookSerializer(books, many=True)
-        return Response(serializer.data)
+            serializer = BookSerializer(books, many=True)
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=400)
