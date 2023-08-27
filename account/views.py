@@ -20,6 +20,8 @@ utc = pytz.UTC
 class UserRegisterView(View):
     form_class = UserRegistrationForm
     template_name = 'account/register.html'
+    count = 0
+    ban = False
 
     def get(self,request):
         form = self.form_class
@@ -30,7 +32,25 @@ class UserRegisterView(View):
         if form.is_valid():
             cd = form.cleaned_data
             random_code = random.randint(1000,9999)
+            if 'user_register_info' in request.session:
+                session = request.session['user_register_info']
+                last_otp_time = datetime.fromisoformat(session['otp_time'])
+                time_difference = datetime.now() - last_otp_time
+                count_lilmit = session['count']
+                ban_status = session['ban']
+                if time_difference < timedelta(minutes=2) and ban_status:
+                    messages.error(request, 'Please wait for 2 minutes before requesting another OTP.')
+                    return redirect('account:register')
+                elif time_difference > timedelta(minutes=2) and ban_status:
+                    ban_status = False
+
+                if time_difference < timedelta(minutes=2) and count_lilmit > 5:
+                    session['ban'] = True
+                    self.count = 0
+                    messages.error(request, 'Please wait for 2 minutes before requesting another OTP.')
+                    return redirect('account:register')
             send_otp_code(cd['phone'],random_code)
+            self.count += 1
             otp_created = datetime.now().isoformat()
             request.session['user_register_info'] = {
                 'phone': cd['phone'],
@@ -39,6 +59,9 @@ class UserRegisterView(View):
                 'password':cd['password'],
                 'otp':random_code,
                 'otp_time':otp_created,
+                'ban':self.ban,
+                'count':self.count,
+
             }
             messages.success(request,'we sent you a code','success')
             return redirect('account:verify_code')
@@ -87,6 +110,8 @@ class UserRegisterVerifyCodeView(View):
 class UserLoginView(View):
     form_class = LoginForm
     template_name = 'account/login.html'
+    count = 1
+    ban = False
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -104,16 +129,62 @@ class UserLoginView(View):
             cd = form.cleaned_data
             user = authenticate(request, phone=cd['user_name'], password = cd['password'])
             if user:
-                random_code = random.randint(1000, 9999)
-                otp_created = datetime.now().isoformat()
-                send_otp_code(cd['user_name'], random_code)
-                request.session['user_login_info']= {
-                    'username':cd['user_name'],
-                    'password':cd['password'],
-                    'otp':random_code,
-                    'otp_time':otp_created,
-                }
-                return redirect('account:verify_code_login')
+                raw_session = request.session
+                if 'user_login_info' in raw_session:
+                    session = raw_session['user_login_info']
+                    print(' ')
+                    print(session)
+                    print(' ')
+                    
+                    last_otp_time = datetime.fromisoformat(session['otp_time'])
+                    time_difference = datetime.now() - last_otp_time
+                    count_limit = session['count']
+                    ban_status = session['ban']
+                    if time_difference < timedelta(minutes=2) and ban_status:
+                        messages.error(request, '1-Please wait for 2 minutes before requesting another OTP.')
+                        return redirect('account:User_Login')
+                    elif time_difference > timedelta(minutes=2) and ban_status:
+                        session['ban'] = False
+                        session['count'] = 0
+                        raw_session.save()
+                        messages.success(request, 'You can login now')
+                        return redirect('account:User_Login')
+
+                    elif time_difference < timedelta(minutes=2) and count_limit > 1:
+                        session['ban'] = True
+                        session['count'] = 0
+                        raw_session.save()
+                        messages.error(request, '2-Please wait for 2 minutes before requesting another OTP.')
+                        return redirect('account:User_Login')
+                    else:
+                        random_code = random.randint(1000, 9999)
+                        otp_created = datetime.now().isoformat()
+                        send_otp_code(cd['user_name'], random_code)
+                        request.session['user_login_info']= {
+                        'username':cd['user_name'],
+                        'password':cd['password'],
+                        'otp':random_code,
+                        'otp_time':otp_created,
+                        'count':count_limit + 1,
+                        'ban':ban_status,
+                        }
+                        request.session.save()
+                        return redirect('account:verify_code_login') 
+                else:
+                    random_code = random.randint(1000, 9999)
+                    otp_created = datetime.now().isoformat()
+                    send_otp_code(cd['user_name'], random_code)
+                    request.session['user_login_info']= {
+                        'username':cd['user_name'],
+                        'password':cd['password'],
+                        'otp':random_code,
+                        'otp_time':otp_created,
+                        'count':self.count,
+                        'ban':self.ban,
+                    }
+                    request.session.save()
+                    return redirect('account:verify_code_login') 
+                       
             elif User.objects.filter(phone=cd['user_name']).exists():
                 messages.error(request, 'Wrong Pass', 'warning')
                 return redirect('account:User_Login')
@@ -163,7 +234,7 @@ class UserLogoutView(LoginRequiredMixin,View):
 class LoginApiView(APIView):
 
     def get(self,request):
-        return Response('This is the login API - Dont import anythin for POST - Data = {phone:1507, password:admin,otp:otp} - Just press POST')
+        return Response('This is the login API - Dont import anythin for POST - Data = {phone:1507, password:admin,otp:otp} - Just press POST you will be logged in as admin')
 
     def post(self, request, *args, **kwargs):
         otp = random.randint(1000, 9999)
