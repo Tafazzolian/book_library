@@ -79,11 +79,19 @@ class BorrowBook(View):
                 messages.error(request, "No copies of this book are currently available.")
 
             elif form.is_valid():
-                borrowed_book = BorrowedBook(user=user, book=book, borrow_date=date.today(), return_date=selected_date)
-                borrowed_book.save()
-                book.copies_available -= 1
-                book.save()
-                messages.success(request, f"You have successfully borrowed '{book.title}'.")
+                try:
+                    book.copies_available -= 1
+                    book.save()
+                except:
+                    messages.error(request, "Someone else borrowed the last copy of this book just before you!")
+                try:
+                    A = book.copies_available
+                    A/A == 1
+                    borrowed_book = BorrowedBook(user=user, book=book, borrow_date=date.today(), return_date=selected_date)
+                    borrowed_book.save()
+                    messages.success(request, f"You have successfully borrowed '{book.title}'.")
+                except:
+                    messages.error(request, "Someone else borrowed the last copy of this book just before you!")
             else:
                 self.form_class()                
             return redirect('library:home')
