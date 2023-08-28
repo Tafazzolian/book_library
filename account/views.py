@@ -150,7 +150,7 @@ class UserLoginView(View):
                         messages.success(request, 'You can login now')
                         return redirect('account:User_Login')
 
-                    elif time_difference < timedelta(minutes=2) and count_limit > 1:
+                    elif time_difference < timedelta(minutes=2) and count_limit > 5:
                         session['ban'] = True
                         session['count'] = 0
                         raw_session.save()
