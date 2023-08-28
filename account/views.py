@@ -31,40 +31,65 @@ class UserRegisterView(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            random_code = random.randint(1000,9999)
-            if 'user_register_info' in request.session:
-                session = request.session['user_register_info']
+            raw_session = request.session
+            if 'user_register_info' in raw_session:
+                session = raw_session['user_register_info']
+                print(' ')
+                print(session)
+                print(' ')
+                
                 last_otp_time = datetime.fromisoformat(session['otp_time'])
                 time_difference = datetime.now() - last_otp_time
-                count_lilmit = session['count']
+                count_limit = session['count']
                 ban_status = session['ban']
                 if time_difference < timedelta(minutes=2) and ban_status:
-                    messages.error(request, 'Please wait for 2 minutes before requesting another OTP.')
-                    return redirect('account:register')
+                    messages.error(request, '1-Please wait for 2 minutes before requesting another OTP.')
+                    return redirect('account:user_register')
                 elif time_difference > timedelta(minutes=2) and ban_status:
-                    ban_status = False
+                    session['ban'] = False
+                    session['count'] = 0
+                    raw_session.save()
+                    messages.success(request, 'You can register now')
+                    return redirect('account:user_register')
 
-                if time_difference < timedelta(minutes=2) and count_lilmit > 5:
+                elif time_difference < timedelta(minutes=2) and count_limit > 5:
                     session['ban'] = True
-                    self.count = 0
-                    messages.error(request, 'Please wait for 2 minutes before requesting another OTP.')
-                    return redirect('account:register')
-            send_otp_code(cd['phone'],random_code)
-            self.count += 1
-            otp_created = datetime.now().isoformat()
-            request.session['user_register_info'] = {
-                'phone': cd['phone'],
-                'email':cd['email'],
-                'full_name':cd['full_name'],
-                'password':cd['password'],
-                'otp':random_code,
-                'otp_time':otp_created,
-                'ban':self.ban,
-                'count':self.count,
-
-            }
-            messages.success(request,'we sent you a code','success')
-            return redirect('account:verify_code')
+                    session['count'] = 0
+                    raw_session.save()
+                    messages.error(request, '2-Please wait for 2 minutes before requesting another OTP.')
+                    return redirect('account:user_register')
+                else:
+                    random_code = random.randint(1000, 9999)
+                    otp_created = datetime.now().isoformat()
+                    send_otp_code(cd['phone'], random_code)
+                    request.session['user_register_info']= {
+                    'phone': cd['phone'],
+                    'email':cd['email'],
+                    'full_name':cd['full_name'],
+                    'password':cd['password'],
+                    'otp':random_code,
+                    'otp_time':otp_created,
+                    'count':count_limit + 1,
+                    'ban':ban_status,
+                    }
+                    request.session.save()
+                    return redirect('account:verify_code') 
+            else:
+                random_code = random.randint(1000, 9999)
+                otp_created = datetime.now().isoformat()
+                send_otp_code(cd['phone'], random_code)
+                request.session['user_register_info']= {
+                    'phone': cd['phone'],
+                    'email':cd['email'],
+                    'full_name':cd['full_name'],
+                    'password':cd['password'],
+                    'otp':random_code,
+                    'otp_time':otp_created,
+                    'count':self.count,
+                    'ban':self.ban,
+                }
+                request.session.save()
+                return redirect('account:verify_code') 
         return render(request, self.template_name ,{'form':form})
 
 
