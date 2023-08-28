@@ -79,12 +79,9 @@ class BorrowBook(View):
                 messages.error(request, "No copies of this book are currently available.")
 
             elif form.is_valid():
-                try:
-                    book.copies_available -= 1
-                    book.save()
-                except:
-                    messages.error(request, "Someone else borrowed the last copy of this book just before you!")
-                try:
+                book.copies_available -= 1
+                book.save()
+                try: #race condition check
                     A = book.copies_available
                     A/A == 1
                     borrowed_book = BorrowedBook(user=user, book=book, borrow_date=date.today(), return_date=selected_date)
