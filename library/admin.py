@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Books, BorrowedBook, User, Author, Genre
+from .models import Books, BorrowedBook, User, Author, Genre, Transaction
 
 admin.site.site_header = 'Tank book library'
 admin.site.index_title = 'Admin Panel'
@@ -17,8 +17,8 @@ class GenreAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-        list_display = ('full_name','email','phone','membership','expiration_date')
-        search_fields = ('full_name','membership')
+        list_display = ('full_name','email','phone','membership','expiration_date','wallet')
+        search_fields = ('full_name','membership','email','phone')
         list_filter = ('membership','expiration_date')
         pass
         
@@ -37,3 +37,11 @@ class BorrowedBookAdmin(admin.ModelAdmin):
         list_filter = ('user','book')
         raw_id_fields = ('user',)
         pass
+
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+        list_display = ('user','book','spent_amount','date')
+        search_fields = ('user',)
+        pass
+
+

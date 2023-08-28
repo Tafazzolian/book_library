@@ -18,12 +18,13 @@ class CustomUser(AbstractBaseUser):
     phone = models.CharField(max_length=11, unique=True, null=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    wallet = models.PositiveIntegerField(default=0)
 
 
     objects = UserManager()
 
     USERNAME_FIELD = 'phone'
-    REQUIRED_FIELDS = ['email','password','full_name',]#['email',] #required fields when making a user in shell by createsuper user
+    REQUIRED_FIELDS = ['email','password','full_name',]
 
     def __str__(self):
         return self.email
@@ -42,7 +43,7 @@ class OtpCode(models.Model):
     phone = models.CharField(max_length=11)
     code = models.PositiveSmallIntegerField()
     created = models.DateTimeField(auto_now= True)
-    created2 = datetime.now()
+    created2 = datetime.now() #testing sth
 
 
     def __str__(self):

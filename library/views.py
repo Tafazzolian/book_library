@@ -1,11 +1,11 @@
 from django.views import View
-from .models import Books,BorrowedBook
+from .models import Books,BorrowedBook, Transaction
 from account.models import CustomUser as User
 from datetime import date, timedelta
 from django.shortcuts import get_object_or_404,render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from .forms import DateInputForm, BooksCrudForm
+from .forms import DateInputForm, BooksCrudForm, WalletChargeForm
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -17,6 +17,7 @@ from django.core.paginator import Paginator
 
 class UserProfile(LoginRequiredMixin,View):
     template_class = 'library/user_profile.html'
+    form_template = WalletChargeForm
 
     def dispatch(self, request,user_id):
         if user_id != request.user.id:
@@ -27,7 +28,19 @@ class UserProfile(LoginRequiredMixin,View):
     def get(self,request, user_id):
         user = User.objects.get(id=user_id)
         borrowed_books = BorrowedBook.objects.filter(user=user.id)
-        return render(request,self.template_class,{'borrowed_books': borrowed_books,'user':user})
+        form = self.form_template
+        return render(request,self.template_class,{'borrowed_books': borrowed_books,'user':user,'form':form})
+    
+    def post(self,request, user_id):
+        user = User.objects.get(id=user_id)
+        form = self.form_template(request.POST)
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            user.wallet += amount
+            user.save()
+            messages.success(request,'You got rich!')
+        return redirect('library:user',user_id=user_id)
+
 
 class ReturnBook(LoginRequiredMixin,View):
     template_class = 'library/user_profile.html'
@@ -66,7 +79,12 @@ class BorrowBook(View):
             selected_date = form.cleaned_data['Return_date']
         if user_auth:
             user = User.objects.get(id=request.user.id)
-            if selected_date-date.today() < timedelta(days=0):
+            user_credit = int(user.wallet)
+            book_price = int(book.price)
+            if user_credit-book_price < 0 :
+                messages.error(request, "Not enough money!",'danger')
+
+            elif selected_date-date.today() < timedelta(days=0):
                 messages.error(request, "You have can't travel in Time!",'danger')
 
             elif user.membership=='V' and selected_date-date.today() >= timedelta(days=14):
@@ -86,6 +104,10 @@ class BorrowBook(View):
                     A/A == 1
                     borrowed_book = BorrowedBook(user=user, book=book, borrow_date=date.today(), return_date=selected_date)
                     borrowed_book.save()
+                    user.wallet = user_credit-book_price
+                    user.save()
+                    transaction = Transaction(user=user, book=book, spent_amount=book_price, date=date.today())
+                    transaction.save()
                     messages.success(request, f"You have successfully borrowed '{book.title}'.")
                 except:
                     messages.error(request, "Someone else borrowed the last copy of this book just before you!")

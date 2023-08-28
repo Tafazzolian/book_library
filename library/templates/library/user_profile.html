@@ -25,7 +25,13 @@
 
     {% block content %} <H1> {{ user.full_name }}'s Profile</H1>
     {% if user.membership == 'V'%} <H4> VIP membership - Your membership expires on {{user.expiration_date}} </H4> {% else %} <H4> NORMAL membership </H4> {% endif%}
-     <br/>
+    <H5>  Your wallet credit: {{user.wallet}}$ </H5>
+    <form action=" " method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Charge!">
+    </form>
+    <br/>
     <div class="card">
         <h3 class="card-title jumbotron">Borrowed Books</h3>
     {% for i in borrowed_books %}

@@ -36,3 +36,10 @@ class BorrowedBook(models.Model):
 
     def __str__(self):
         return f"{self.user.full_name} borrowed {self.book.title}"
+    
+class Transaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    book = models.ForeignKey(Books,on_delete=models.PROTECT)
+    spent_amount = models.PositiveIntegerField()
+    date = models.DateField()
+
