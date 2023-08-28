@@ -76,7 +76,7 @@ class BorrowBook(View):
                 messages.error(request, "NORMAL users can borrow a book for max 7 days.",'danger')
 
             elif book.copies_available <= 0:
-                messages.error(request, "No copies of this book are currently available.")
+                messages.error(request, "No copies of this book are currently available!",'danger')
 
             elif form.is_valid():
                 book.copies_available -= 1
@@ -110,7 +110,7 @@ class Buy(View):
         try:
             user = User.objects.get(id=user_id)
             if user.membership == 'V':
-                messages.warning(request, 'You are a VIP member. No need to buy a vip membership')
+                messages.warning(request, 'You are already a VIP member!')
                 return redirect('library:home')
             else:
                 user.membership = 'V' #User(id=user,membership='V')
