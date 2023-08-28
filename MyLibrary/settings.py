@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'background_task',
     'rest_framework',
     'debug_toolbar',
     'library',
@@ -142,3 +141,11 @@ REST_FRAMEWORK = {
     )
 }
 LOGIN_URL = '/Login/'
+
+# Celery Configuration
+#BROKER_URL = 'amqp://http://localhost:5672' #'amqp://172.17.0.1:5672'
+#CELERY_RESULT_BACKEND = 'rpc://'
+#CELERY_BROKER_URL = 'amqp://guest:guest@1localhost:5672/'
+CELERY_BROKER_URL = 'pyamqp://guest:guest@localhost//'
+CELERY_RESULT_BACKEND = 'rpc://'
+

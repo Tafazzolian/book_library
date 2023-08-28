@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser, AbstractBaseUser
 from library.managers import UserManager
 from datetime import timedelta, datetime
 from django.utils import timezone
-from background_task import background
 
 
 class CustomUser(AbstractBaseUser):
@@ -27,12 +26,6 @@ class CustomUser(AbstractBaseUser):
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['email','password','full_name',]
-
-    @background(schedule=timedelta(days=1))
-    def update_wallet(self):
-        cost = self.wallet
-        self.wallet = cost - 1
-        self.save()
 
     def __str__(self):
         return self.email
