@@ -16,7 +16,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'run-every-day-at-midnight': {
         'task': 'account.tasks.handle',
-        'schedule': timedelta(seconds=5),
+        'schedule': timedelta(seconds=20),
         #'schedule': crontab(minute=1, hour=0),
     },
 }
