@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.views import View
 from .forms import UserRegistrationForm,VerifyCodeForm, LoginForm, VerifyCodeForm2
 import random
-from utils import send_otp_code
+from utils import send_otp_code, send_otp_code_2
 from .models import OtpCode
 from django.contrib import messages
 from datetime import timedelta, datetime
@@ -181,7 +181,11 @@ class UserLoginView(View):
                         return redirect('account:User_Login')
                     else:
                         otp_created = datetime.now().isoformat()
-                        code = send_otp_code(cd['user_name'])
+                        try:
+                            code = send_otp_code(cd['user_name'])
+                        except:
+                            code = send_otp_code_2(cd['user_name'])
+
                         request.session['user_login_info']= {
                         'username':cd['user_name'],
                         'password':cd['password'],
@@ -194,7 +198,10 @@ class UserLoginView(View):
                         return redirect('account:verify_code_login') 
                 else:
                     otp_created = datetime.now().isoformat()
-                    code = send_otp_code(cd['user_name'])
+                    try:
+                        code = send_otp_code(cd['user_name'])
+                    except:
+                        code = send_otp_code_2(cd['user_name'])
                     request.session['user_login_info']= {
                         'username':cd['user_name'],
                         'password':cd['password'],
