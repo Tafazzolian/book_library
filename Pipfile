@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+djangorestframework = "*"
+django-debug-toolbar = "*"
+kavenegar = "*"
+djangorestframework-simplejwt = "*"
+schedule = "*"
+django-background-tasks = "*"
+pika = "*"
+celery = "*"
+ghasedakpack = "*"
+pybreaker = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
