@@ -59,15 +59,14 @@ class UserRegisterView(View):
                     messages.error(request, '2-Please wait for 2 minutes before requesting another OTP.')
                     return redirect('account:user_register')
                 else:
-                    random_code = random.randint(1000, 9999)
                     otp_created = datetime.now().isoformat()
-                    send_otp_code(cd['phone'], random_code)
+                    code = send_otp_code(cd['phone'])
                     request.session['user_register_info']= {
                     'phone': cd['phone'],
                     'email':cd['email'],
                     'full_name':cd['full_name'],
                     'password':cd['password'],
-                    'otp':random_code,
+                    'otp':code,
                     'otp_time':otp_created,
                     'count':count_limit + 1,
                     'ban':ban_status,
@@ -75,15 +74,14 @@ class UserRegisterView(View):
                     request.session.save()
                     return redirect('account:verify_code') 
             else:
-                random_code = random.randint(1000, 9999)
                 otp_created = datetime.now().isoformat()
-                send_otp_code(cd['phone'], random_code)
+                code = send_otp_code(cd['phone'])
                 request.session['user_register_info']= {
                     'phone': cd['phone'],
                     'email':cd['email'],
                     'full_name':cd['full_name'],
                     'password':cd['password'],
-                    'otp':random_code,
+                    'otp':code,
                     'otp_time':otp_created,
                     'count':self.count,
                     'ban':self.ban,
@@ -182,13 +180,12 @@ class UserLoginView(View):
                         messages.error(request, '2-Please wait for 2 minutes before requesting another OTP.')
                         return redirect('account:User_Login')
                     else:
-                        random_code = random.randint(1000, 9999)
                         otp_created = datetime.now().isoformat()
-                        send_otp_code(cd['user_name'], random_code)
+                        code = send_otp_code(cd['user_name'])
                         request.session['user_login_info']= {
                         'username':cd['user_name'],
                         'password':cd['password'],
-                        'otp':random_code,
+                        'otp':code,
                         'otp_time':otp_created,
                         'count':count_limit + 1,
                         'ban':ban_status,
@@ -196,13 +193,12 @@ class UserLoginView(View):
                         request.session.save()
                         return redirect('account:verify_code_login') 
                 else:
-                    random_code = random.randint(1000, 9999)
                     otp_created = datetime.now().isoformat()
-                    send_otp_code(cd['user_name'], random_code)
+                    code = send_otp_code(cd['user_name'])
                     request.session['user_login_info']= {
                         'username':cd['user_name'],
                         'password':cd['password'],
-                        'otp':random_code,
+                        'otp':code,
                         'otp_time':otp_created,
                         'count':self.count,
                         'ban':self.ban,
