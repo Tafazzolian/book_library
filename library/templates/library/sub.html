@@ -24,7 +24,8 @@
 <div class="jumbotron">
 
     {% block content %} <H1> Welcome {{ request.user.full_name }} </H1>
-    <H4>The price for buying a vip membership is 2000,000 Rials.</H4>
+    <H4>The price for buying a vip membership is 200$.</H4>
+</br> <H5> You have {{request.user.wallet}}$ in your wallet</H5>
     <a class="card-body" href="{% url 'library:buy' user_id  %}" >Buy vip membership</a>
     {% endblock %}
 </div>
