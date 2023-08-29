@@ -21,10 +21,10 @@ def handle():
             if spent_amount_sum and spent_amount_sum>300:
                 membership_cost = 0
                 continue
-            if transaction_count>3:
-                membership_cost = membership_cost - (30/100)*membership_cost
+            if transaction_count > 3:
+                discount = membership_cost - (30/100)*membership_cost
                 try:
-                    user.wallet = wallet - membership_cost
+                    user.wallet = wallet - discount
                     user.save()
                     continue
                 except:
