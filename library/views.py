@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import BookSerializer
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 
 
 class UserProfile(LoginRequiredMixin,View):
@@ -97,11 +98,10 @@ class BorrowBook(View):
                 messages.error(request, "No copies of this book are currently available!",'danger')
 
             elif form.is_valid():
-                book.copies_available -= 1
-                book.save()
-                try: #race condition check
-                    A = book.copies_available
-                    A/A == 1
+                #race condition check
+                try: 
+                    book.copies_available -= 1
+                    book.save()
                     borrowed_book = BorrowedBook(user=user, book=book, borrow_date=date.today(), return_date=selected_date)
                     borrowed_book.save()
                     user.wallet = user_credit-book_price

@@ -15,8 +15,15 @@ app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
     'run-every-day-at-midnight': {
-        'task': 'account.tasks.handle',
-        'schedule': timedelta(seconds=20),
-        #'schedule': crontab(minute=1, hour=0),
+        'task': 'account.tasks.cost',
+        #'schedule': timedelta(seconds=20),
+        'schedule': crontab(minute=30, hour=0),
+    },
+}
+
+app.conf.beat_schedule = {
+    'check-membership-every-midnight': {
+        'task': 'account.tasks.membership',
+        'schedule': crontab(hour=0, minute=0),
     },
 }

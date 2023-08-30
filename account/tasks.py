@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from django.db.models import Sum
 
 @shared_task
-def handle():
+def cost():
     users = User.objects.values('id','membership','wallet')
     membership_cost = 10
     for i in users:
@@ -35,4 +35,11 @@ def handle():
                 continue
             except:
                 continue
-            
+
+@shared_task
+def membership():
+    users = User.objects.filter(membership='V')
+    for user in users:
+        if user.expiration_date <= date.today():
+            user.membership = 'N'
+            user.save()

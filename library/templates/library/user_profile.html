@@ -36,7 +36,7 @@
         <h3 class="card-title jumbotron">Borrowed Books</h3>
     {% for i in borrowed_books %}
     <li> Borrowed by: {{i.user.full_name}} - Book title: {{i.book}}- Return date: {{i.return_date}}</li>
-    <a class="card-body" href="{% url 'library:return' i.id  %}" >Return {{i.book}}</a>
+    <a class="btn btn-info" style="width: 20%;" href="{% url 'library:return' i.id  %}" >Return {{i.book}}</a>
 
     {% endfor %}
     {% endblock %}

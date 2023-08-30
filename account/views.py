@@ -265,9 +265,15 @@ class LoginApiView(APIView):
         return Response('This is the login API - Dont import anythin for POST - Data = {phone:1507, password:admin,otp:otp} - Just press POST you will be logged in as admin')
 
     def post(self, request, *args, **kwargs):
-        otp = random.randint(1000, 9999)
-        data = {'phone':1507, 'password':'admin','otp':otp}
-        send_otp_code(data['phone'], otp)
+        data1= {'phone':1507, 'password':'admin'}
+        try:
+            otp = send_otp_code(data1['phone'])
+            data = {'phone':1507, 'password':'admin','otp':otp}
+            
+        except:
+            otp = send_otp_code_2(data1['phone'])
+            data = {'phone':1507, 'password':'admin','otp':otp}
+            
         if data['otp'] == otp:
             print(otp,'OTP verified')
         user = User.objects.get(phone= data['phone'])
