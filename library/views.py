@@ -134,9 +134,13 @@ class Buy(View):
             if user.membership == 'V':
                 messages.warning(request, 'You are already a VIP member!')
                 return redirect('library:home')
+            elif user.wallet < 200:
+                messages.warning(request, 'You dont have enough money in your wallet!')
+                return redirect('library:home')
             else:
                 user.membership = 'V' #User(id=user,membership='V')
                 user.expiration_date = date.today()+timedelta(days=31)
+                user.wallet -= 200
                 user.save()
                 messages.success(request,'You are now a VIP member')
                 return redirect('library:home')
