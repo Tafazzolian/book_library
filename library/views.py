@@ -12,6 +12,7 @@ from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import BookSerializer
+from .repository import Model
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 
@@ -20,25 +21,25 @@ class UserProfile(LoginRequiredMixin,View):
     template_class = 'library/user_profile.html'
     form_template = WalletChargeForm
 
-    def dispatch(self, request,user_id):
+    def dispatch(self, request, user_id):
         if user_id != request.user.id:
             messages.error(request, 'No cheating!', 'danger')
             return redirect('library:home')
         return super().dispatch(request, user_id)
 
     def get(self,request, user_id):
-        user = User.objects.get(id=user_id)
+        user = Model.get(model=User,id=user_id)
         borrowed_books = BorrowedBook.objects.filter(user=user.id)
         form = self.form_template
         return render(request,self.template_class,{'borrowed_books': borrowed_books,'user':user,'form':form})
     
     def post(self,request, user_id):
-        user = User.objects.get(id=user_id)
+        user = Model.get(model=User,id=user_id)
         form = self.form_template(request.POST)
         if form.is_valid():
             amount = form.cleaned_data['amount']
             user.wallet += amount
-            user.save()
+            Model.save(user)
             messages.success(request,'You got rich!')
         return redirect('library:user',user_id=user_id)
 
@@ -47,18 +48,18 @@ class ReturnBook(LoginRequiredMixin,View):
     template_class = 'library/user_profile.html'
     
     def dispatch(self, request,borrowed_book_id):
-        borrow_id = get_object_or_404(BorrowedBook, id=borrowed_book_id)
+        borrow_id = Model.get(model=BorrowedBook,id=borrowed_book_id)#get_object_or_404(BorrowedBook, id=borrowed_book_id)
         if borrow_id.user.id != request.user.id:
             messages.error(request, 'No cheating!', 'danger')
             return redirect('library:home')
         return super().dispatch(request, borrowed_book_id)
     
     def get(self, request, borrowed_book_id):
-        borrowed_book = get_object_or_404(BorrowedBook, id=borrowed_book_id)
+        borrowed_book = Model.get(model=BorrowedBook,id=borrowed_book_id)#get_object_or_404(BorrowedBook, id=borrowed_book_id)
         book = borrowed_book.book
         book.copies_available += 1
-        book.save()
-        borrowed_book.delete()
+        Model.save(book)
+        Model.delete(borrowed_book)
         messages.success(request, "You have successfully returned the book.")
         return redirect('library:home')
 
@@ -68,18 +69,18 @@ class BorrowBook(View):
     template_class = 'library/borrow.html'
     
     def get(self,request, books_id):
-        book = get_object_or_404(Books, id=books_id)
+        book = Model.get(model=Books, id=books_id)#get_object_or_404(Books, id=books_id)
         form = self.form_class()
         return render(request,self.template_class,{'form':form,'book':book})
     
     def post(self,request, books_id):
         form = self.form_class(request.POST)    
-        book = get_object_or_404(Books, id=books_id)
+        book = Model.get(model=Books, id=books_id)
         user_auth = request.user.id
         if form.is_valid():
             selected_date = form.cleaned_data['Return_date']
         if user_auth:
-            user = User.objects.get(id=request.user.id)
+            user = Model.get(model=User,id=request.user.id)
             user_credit = int(user.wallet)
             book_price = int(book.price)
             if user_credit-book_price < 0 :
@@ -101,13 +102,13 @@ class BorrowBook(View):
                 #race condition check
                 try: 
                     book.copies_available -= 1
-                    book.save()
+                    Model.save(book)
                     borrowed_book = BorrowedBook(user=user, book=book, borrow_date=date.today(), return_date=selected_date)
-                    borrowed_book.save()
+                    Model.save(borrowed_book)
                     user.wallet = user_credit-book_price
-                    user.save()
+                    Model.save(user)
                     transaction = Transaction(user=user, book=book, spent_amount=book_price, date=date.today())
-                    transaction.save()
+                    Model.save(transaction)
                     messages.success(request, f"You have successfully borrowed '{book.title}'.")
                 except:
                     messages.error(request, "Someone else borrowed the last copy of this book just before you!")
@@ -121,7 +122,7 @@ class BorrowBook(View):
 class Subscription(View):
     def get(self,request):
         try:
-            user = User.objects.get(id=request.user.id)
+            user = Model.get(model=User, id=request.user.id) #User.objects.get(id=request.user.id)
             return render(request, 'library/sub.html',{'user_id':user.id})
         except:
             user = 0
@@ -130,7 +131,7 @@ class Subscription(View):
 class Buy(View):
     def get(self,request, user_id):
         try:
-            user = User.objects.get(id=user_id)
+            user = Model.get(model=User, id=user_id)#User.objects.get(id=user_id)
             if user.membership == 'V':
                 messages.warning(request, 'You are already a VIP member!')
                 return redirect('library:home')
@@ -141,7 +142,7 @@ class Buy(View):
                 user.membership = 'V' #User(id=user,membership='V')
                 user.expiration_date = date.today()+timedelta(days=31)
                 user.wallet -= 200
-                user.save()
+                Model.save(user)
                 messages.success(request,'You are now a VIP member')
                 return redirect('library:home')
         except:

@@ -2,17 +2,15 @@ from django.shortcuts import render,redirect
 from django.views import View
 from .forms import UserRegistrationForm,VerifyCodeForm, LoginForm, VerifyCodeForm2
 from utils import send_otp_code, send_otp_code_2
-from .models import OtpCode
 from django.contrib import messages
 from datetime import timedelta, datetime
-import pytz
 from django.contrib.auth import authenticate, get_user_model , login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
-import requests
 from .repository import Session, CreateUser
+import pytz
 
 User = get_user_model()
 utc = pytz.UTC
