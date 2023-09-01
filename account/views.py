@@ -1,7 +1,6 @@
 from django.shortcuts import render,redirect
 from django.views import View
 from .forms import UserRegistrationForm,VerifyCodeForm, LoginForm, VerifyCodeForm2
-import random
 from utils import send_otp_code, send_otp_code_2
 from .models import OtpCode
 from django.contrib import messages
@@ -13,6 +12,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 import requests
+from .repository import Session, CreateUser
 
 User = get_user_model()
 utc = pytz.UTC
@@ -31,7 +31,8 @@ class UserRegisterView(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            raw_session = request.session
+            #raw_session = request.session
+            raw_session = Session.Raw_Session(request)
             if 'user_register_info' in raw_session:
                 session = raw_session['user_register_info']
                 print(' ')
@@ -60,33 +61,19 @@ class UserRegisterView(View):
                     return redirect('account:user_register')
                 else:
                     otp_created = datetime.now().isoformat()
-                    code = send_otp_code(cd['phone'])
-                    request.session['user_register_info']= {
-                    'phone': cd['phone'],
-                    'email':cd['email'],
-                    'full_name':cd['full_name'],
-                    'password':cd['password'],
-                    'otp':code,
-                    'otp_time':otp_created,
-                    'count':count_limit + 1,
-                    'ban':ban_status,
-                    }
-                    request.session.save()
-                    return redirect('account:verify_code') 
+                    try:
+                        code = send_otp_code(cd['phone'])
+                    except:
+                        code = send_otp_code_2(cd['phone'])
+                    Session.Register_Session(request, code=code, otp_created=otp_created, count=count_limit+1, ban=ban_status, cd=cd)
+                    return redirect('account:verify_code')
             else:
                 otp_created = datetime.now().isoformat()
-                code = send_otp_code(cd['phone'])
-                request.session['user_register_info']= {
-                    'phone': cd['phone'],
-                    'email':cd['email'],
-                    'full_name':cd['full_name'],
-                    'password':cd['password'],
-                    'otp':code,
-                    'otp_time':otp_created,
-                    'count':self.count,
-                    'ban':self.ban,
-                }
-                request.session.save()
+                try:
+                    code = send_otp_code(cd['phone'])
+                except:
+                    code = send_otp_code_2(cd['phone'])
+                Session.Register_Session(request, code=code, otp_created=otp_created, count=self.count, ban=self.ban,cd=cd)
                 return redirect('account:verify_code') 
         return render(request, self.template_name ,{'form':form})
 
@@ -99,7 +86,7 @@ class UserRegisterVerifyCodeView(View):
 
     def get(self,request):
         form = self.form_class
-        user_session = request.session['user_register_info']
+        user_session = Session.Raw_Session(request)['user_register_info']
         code = user_session['otp']
         return render(request,self.template_name,{'form':form,'code':code})
 
@@ -115,10 +102,7 @@ class UserRegisterVerifyCodeView(View):
         if form.is_valid():
             cd = form.cleaned_data
             if cd['code'] == code and otp_expire_time > now :
-                User.objects.create_user(user_session['phone'],
-                                         user_session['email'],
-                                         user_session['full_name'],
-                                         user_session['password'])
+                CreateUser.User_Create(user_session=user_session)
                 user = authenticate(request, phone=user_session['phone'], password=user_session['password'])
                 if isinstance(user, User):
                     login(request, user)
@@ -152,7 +136,7 @@ class UserLoginView(View):
             cd = form.cleaned_data
             user = authenticate(request, phone=cd['user_name'], password = cd['password'])
             if user:
-                raw_session = request.session
+                raw_session = Session.Raw_Session(request)
                 if 'user_login_info' in raw_session:
                     session = raw_session['user_login_info']
                     print(' ')
@@ -185,16 +169,8 @@ class UserLoginView(View):
                             code = send_otp_code(cd['user_name'])
                         except:
                             code = send_otp_code_2(cd['user_name'])
-
-                        request.session['user_login_info']= {
-                        'username':cd['user_name'],
-                        'password':cd['password'],
-                        'otp':code,
-                        'otp_time':otp_created,
-                        'count':count_limit + 1,
-                        'ban':ban_status,
-                        }
-                        request.session.save()
+                        
+                        Session.Login_Session(request, code=code, otp_created=otp_created, count=count_limit+1, ban=ban_status, cd=cd)
                         return redirect('account:verify_code_login') 
                 else:
                     otp_created = datetime.now().isoformat()
@@ -202,15 +178,7 @@ class UserLoginView(View):
                         code = send_otp_code(cd['user_name'])
                     except:
                         code = send_otp_code_2(cd['user_name'])
-                    request.session['user_login_info']= {
-                        'username':cd['user_name'],
-                        'password':cd['password'],
-                        'otp':code,
-                        'otp_time':otp_created,
-                        'count':self.count,
-                        'ban':self.ban,
-                    }
-                    request.session.save()
+                    Session.Login_Session(request, code=code, otp_created=otp_created, count=self.count, ban=self.ban,cd=cd)
                     return redirect('account:verify_code_login') 
                        
             elif User.objects.filter(phone=cd['user_name']).exists():
@@ -229,13 +197,13 @@ class UserLoginVerifyCodeView(View):
     #utc = pytz.UTC
 
     def get(self,request):
-        code = request.session['user_login_info']
+        code = Session.Raw_Session(request)['user_login_info']['otp']
         form = self.form_class
-        return render(request,self.template_name,{'form':form,'code':code['otp']})
+        return render(request,self.template_name,{'form':form,'code':code})
 
     def post(self,request):
         form = self.form_class(request.POST)
-        user_session = request.session['user_login_info']
+        user_session = Session.Raw_Session(request)['user_login_info']
         otp_sent_time_raw = user_session['otp_time']
         otp_sent_time = datetime.fromisoformat(otp_sent_time_raw)
         otp_expire_time = (otp_sent_time + timedelta(minutes=1)).replace(tzinfo=utc)

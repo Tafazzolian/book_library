@@ -4,6 +4,7 @@ from library.models import Transaction
 from datetime import date, timedelta
 from django.db.models import Sum
 
+#membership daily cost
 @shared_task
 def cost():
     users = User.objects.values('id','membership','wallet')
@@ -36,6 +37,7 @@ def cost():
             except:
                 continue
 
+#membership expiration check
 @shared_task
 def membership():
     users = User.objects.filter(membership='V')
