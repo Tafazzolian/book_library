@@ -33,9 +33,11 @@
         {{ form.as_p }}
         <input type="submit" value="Save" class="btn btn-info">
     </form>
-    
+
     {% if form.instance.id != None and form.instance.id != 0 %}
         <a href="{% url 'library:bdelete' form.instance.id %}" class="btn btn-danger" style="width: 10%;">Delete</a>
     {% endif %}
     {% endblock %}
+
+    
 

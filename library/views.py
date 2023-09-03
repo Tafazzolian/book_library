@@ -29,9 +29,8 @@ class UserProfile(LoginRequiredMixin,View):
 
     def get(self,request, user_id):
         user = Model.get(model=User,id=user_id)
-        borrowed_books = BorrowedBook.objects.filter(user=user.id)
-        form = self.form_template
-        return render(request,self.template_class,{'borrowed_books': borrowed_books,'user':user,'form':form})
+        borrowed_books = Model.filter(BorrowedBook,user = user.id)
+        return render(request,self.template_class,{'borrowed_books': borrowed_books,'user':user,'form':self.form_template})
     
     def post(self,request, user_id):
         user = Model.get(model=User,id=user_id)

@@ -23,8 +23,8 @@ class Model:
         return data
     
     @staticmethod
-    def filter(model,*args):
-        data = model.objects.filter(args)
+    def filter(model, **kwargs):
+        data = model.objects.filter(**kwargs)
         return data
 
     
