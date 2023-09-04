@@ -27,6 +27,7 @@ class UserProfile(LoginRequiredMixin,View):
             return redirect('library:home')
         return super().dispatch(request, user_id)
 
+
     def get(self,request, user_id):
         user = Model.get(model=User,id=user_id)
         borrowed_books = Model.filter(BorrowedBook,user = user.id)

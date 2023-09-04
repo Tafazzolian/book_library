@@ -1,7 +1,8 @@
 from django.shortcuts import render,redirect
 from django.views import View
 from .forms import UserRegistrationForm,VerifyCodeForm, LoginForm, VerifyCodeForm2
-from utils import send_otp_code, send_otp_code_2
+from utils import send_otp_code_1, send_otp_code_2, send_otp_code_3
+from circuit_breaker import otp_generator
 from django.contrib import messages
 from datetime import timedelta, datetime
 from django.contrib.auth import authenticate, get_user_model , login, logout
@@ -59,19 +60,13 @@ class UserRegisterView(View):
                     return redirect('account:user_register')
                 else:
                     otp_created = datetime.now().isoformat()
-                    try:
-                        code = send_otp_code(cd['phone'])
-                    except:
-                        code = send_otp_code_2(cd['phone'])
+                    code = otp_generator(cd)
                     Session.Register_Session(request, code=code, otp_created=otp_created, count=count_limit+1, ban=ban_status, cd=cd)
                     return redirect('account:verify_code')
             else:
                 otp_created = datetime.now().isoformat()
-                try:
-                    code = send_otp_code(cd['phone'])
-                except:
-                    code = send_otp_code_2(cd['phone'])
-                Session.Register_Session(request, code=code, otp_created=otp_created, count=self.count, ban=self.ban,cd=cd)
+                code = otp_generator(cd)
+                Session.Register_Session(request, code=code, otp_created=otp_created, count=self.count, ban=self.ban, cd=cd)
                 return redirect('account:verify_code') 
         return render(request, self.template_name ,{'form':form})
 
@@ -163,19 +158,12 @@ class UserLoginView(View):
                         return redirect('account:User_Login')
                     else:
                         otp_created = datetime.now().isoformat()
-                        try:
-                            code = send_otp_code(cd['user_name'])
-                        except:
-                            code = send_otp_code_2(cd['user_name'])
-                        
+                        code = otp_generator(cd)
                         Session.Login_Session(request, code=code, otp_created=otp_created, count=count_limit+1, ban=ban_status, cd=cd)
                         return redirect('account:verify_code_login') 
                 else:
                     otp_created = datetime.now().isoformat()
-                    try:
-                        code = send_otp_code(cd['user_name'])
-                    except:
-                        code = send_otp_code_2(cd['user_name'])
+                    code = otp_generator(cd)
                     Session.Login_Session(request, code=code, otp_created=otp_created, count=self.count, ban=self.ban,cd=cd)
                     return redirect('account:verify_code_login') 
                        
@@ -232,13 +220,8 @@ class LoginApiView(APIView):
 
     def post(self, request, *args, **kwargs):
         data1= {'phone':1507, 'password':'admin'}
-        try:
-            otp = send_otp_code(data1['phone'])
-            data = {'phone':1507, 'password':'admin','otp':otp}
-            
-        except:
-            otp = send_otp_code_2(data1['phone'])
-            data = {'phone':1507, 'password':'admin','otp':otp}
+        otp = otp_generator(cd=data1)
+        data = {'phone':1507, 'password':'admin','otp':otp}
             
         if data['otp'] == otp:
             print(otp,'OTP verified')
