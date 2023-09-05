@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Books, BorrowedBook, User, Author, Genre, Transaction
+from account.models import OtpBanStatus,ErrorList
 
 admin.site.site_header = 'Tank book library'
 admin.site.index_title = 'Admin Panel'
@@ -44,4 +45,13 @@ class TransactionAdmin(admin.ModelAdmin):
         search_fields = ('user',)
         pass
 
+@admin.register(OtpBanStatus)
+class OtpBanStatusAdmin(admin.ModelAdmin):
+        list_display = ('sms_function','blocked_time','ban_statuse')
+        search_fields = ('sms_function',)
+        pass
 
+@admin.register(ErrorList)
+class ErrorListAdmin(admin.ModelAdmin):
+        list_display = ('error_list',)
+        pass

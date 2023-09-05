@@ -15,6 +15,7 @@ pika = "*"
 celery = "*"
 ghasedakpack = "*"
 pybreaker = "*"
+django-redis = "*"
 
 [dev-packages]
 

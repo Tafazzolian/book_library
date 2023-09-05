@@ -25,5 +25,6 @@ def send_otp_code_3(phone):
     #api = KavenegarAPI('****')
     #params = {'sender': '1000596446', 'receptor': phone, 'message': f'{code}.وب سرویس پیام کوتاه کاوه نگار'}
     #response = api.sms_send(params)
+    raise SMSSendingException('Fialed to send code using Kavenegar')
     return random_code
 
