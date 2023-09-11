@@ -38,7 +38,7 @@ def cost():
                 continue
 
 #membership expiration check
-#how to delay check
+#how to delay checkyyyyy
 @shared_task
 def membership():
     users = User.objects.filter(membership='V')
