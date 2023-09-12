@@ -39,6 +39,8 @@ def cost():
 
 #membership expiration check
 #how to delay checkyyyyy
+#how to delay p
+a = 'keeping my git alive'
 @shared_task
 def membership():
     users = User.objects.filter(membership='V')
